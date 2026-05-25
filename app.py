@@ -31,7 +31,7 @@ CORS(app)
 
 @app.route("/")
 def home():
-    return render_template("add.html")
+    return jsonify({"message": "Backend running"})
 
 
 # =========================================
