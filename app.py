@@ -15,7 +15,8 @@ import cloudinary
 import cloudinary.uploader
 from langdetect import detect
 from pinecone import Pinecone
-from sentence_transformers import SentenceTransformer
+
+# from sentence_transformers import SentenceTransformer
 
 # =========================================
 # LOAD ENV
@@ -57,11 +58,11 @@ index = pc.Index("realestate")
 # =========================================
 # EMBEDDING MODEL
 # =========================================
-embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+# embed_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def create_embedding(text):
-    return embed_model.encode(text).tolist()
+    return [0.0] * 384
 
 
 # =========================================
