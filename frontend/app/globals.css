@@ -1,0 +1,52 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&f[]=clash-display@500,600,700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 220 23% 98%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --border: 215 23% 88%;
+  --muted: 210 20% 94%;
+  --accent: 190 100% 96%;
+  --primary: 198 93% 38%;
+  --primary-foreground: 0 0% 100%;
+}
+
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  --card: 223 47% 9%;
+  --border: 215 27% 20%;
+  --muted: 220 24% 14%;
+  --accent: 198 46% 18%;
+  --primary: 191 91% 48%;
+  --primary-foreground: 222 47% 8%;
+}
+
+* { @apply border-border; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Satoshi', sans-serif;
+  @apply bg-background text-foreground antialiased;
+  background-image:
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.10), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.10), transparent 24%);
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Clash Display', 'Satoshi', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.glass {
+  @apply border border-white/20 bg-white/60 backdrop-blur-2xl dark:bg-white/5;
+}
+
+.hero-grid {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.text-balance { text-wrap: balance; }

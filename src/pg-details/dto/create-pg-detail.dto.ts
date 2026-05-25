@@ -1,0 +1,32 @@
+export class CreatePGDetailsDto {
+  userId!: number;
+  city!: string;
+  locality!: string;
+  street?: string;
+  landmark?: string;
+  latitude?: number;
+  longitude?: number;
+  propertyName?: string;
+  propertyType!: string;
+  roomType?: any;
+  foodIncluded?: boolean;
+  foodType?: any;
+  pgAmenities?: any;
+  parking?: string;
+  availableFrom?: string;
+  noticePeriod?: number;
+  gateClosingTime?: string;
+  images?: string[];
+  video?: string;
+  contactName?: string;
+  mobileNo?: string;
+  whatsapp?: boolean;
+  whatsappupdates?: boolean;
+  preferredTenant?: any;
+  preferredGuests?: any;
+  restrictions?: any;
+  propertyDescription?: string;
+  currentStep?: number;
+  isDraft?: boolean;
+  isDeleted?: boolean;
+}

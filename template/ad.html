@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zuntra AI Advertisement Generator</title>
+  <meta name="description" content="Premium AI-powered property advertisement generator with Cloudinary upload and Flask API integration." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root,
+    html[data-theme="light"] {
+      --bg: #f5f7fb;
+      --bg-soft: #eef2f7;
+      --surface: rgba(255, 255, 255, 0.76);
+      --surface-strong: rgba(255, 255, 255, 0.92);
+      --surface-muted: rgba(244, 247, 251, 0.85);
+      --text: #111827;
+      --text-muted: #5b6474;
+      --text-faint: #8e98a8;
+      --line: rgba(17, 24, 39, 0.08);
+      --line-strong: rgba(17, 24, 39, 0.14);
+      --brand: #0f766e;
+      --brand-2: #38bdf8;
+      --brand-3: #0ea5a4;
+      --success: #15803d;
+      --warning: #d97706;
+      --error: #b91c1c;
+      --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 24px 80px rgba(15, 23, 42, 0.14);
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 28px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #081018;
+      --bg-soft: #0d1622;
+      --surface: rgba(11, 20, 32, 0.72);
+      --surface-strong: rgba(16, 24, 39, 0.88);
+      --surface-muted: rgba(255, 255, 255, 0.03);
+      --text: #edf2f7;
+      --text-muted: #a8b3c7;
+      --text-faint: #7d8799;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.14);
+      --brand: #2dd4bf;
+      --brand-2: #38bdf8;
+      --brand-3: #14b8a6;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --error: #f87171;
+      --shadow-sm: 0 10px 28px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 28px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(45, 212, 191, 0.18), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.16), transparent 26%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+      padding: 24px;
+    }
+
+    button, input { font: inherit; }
+    img { display: block; max-width: 100%; }
+
+    .page-shell {
+      width: min(1200px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 24px;
+    }
+
+    .glass {
+      background: var(--surface);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-radius: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: white;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 10px 24px rgba(15, 118, 110, 0.24);
+      font-weight: 800;
+    }
+
+    .brand-copy h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-copy p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .theme-toggle {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--surface-strong);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .theme-toggle:hover,
+    .theme-toggle:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      outline: none;
+    }
+
+    .hero {
+      padding: clamp(24px, 4vw, 40px);
+      border-radius: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -30% auto;
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+      color: var(--text-muted);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      margin-bottom: 16px;
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 22px;
+      align-items: end;
+      grid-template-columns: 1.25fr 0.75fr;
+    }
+
+    .hero h2 {
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 0.96;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      max-width: 12ch;
+    }
+
+    .hero h2 span {
+      display: block;
+      font-family: "Instrument Serif", serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--brand-2);
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      max-width: 62ch;
+      margin-top: 16px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      font-size: 15px;
+    }
+
+    .hero-stats {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stat-card {
+      border-radius: 22px;
+      padding: 18px;
+      background: var(--surface-muted);
+      border: 1px solid var(--line);
+      min-height: 110px;
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 28px;
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+    }
+
+    .stat-card span {
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: 420px minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .panel {
+      border-radius: 28px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title h3 {
+      font-size: 22px;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+    }
+
+    .panel-title p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .input {
+      width: 100%;
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface-strong);
+      color: var(--text);
+      outline: none;
+      transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .input:focus {
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+    }
+
+    .dropzone {
+      position: relative;
+      padding: 22px;
+      border: 1.5px dashed rgba(56, 189, 248, 0.28);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.06), rgba(45, 212, 191, 0.03));
+      transition: transform 200ms ease, border-color 200ms ease, background 200ms ease;
+      cursor: pointer;
+    }
+
+    .dropzone.dragover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.55);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.10), rgba(45, 212, 191, 0.07));
+    }
+
+    .dropzone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .dropzone-visual {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .drop-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+    }
+
+    .dropzone-visual strong {
+      font-size: 16px;
+    }
+
+    .dropzone-visual span {
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.6;
+      max-width: 30ch;
+    }
+
+    .preview-card {
+      display: none;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 22px;
+      background: var(--surface-muted);
+      border: 1px solid var(--line);
+      animation: fadeInUp 380ms ease;
+    }
+
+    .preview-card.active { display: block; }
+
+    .preview-card img {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .preview-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .progress-wrap {
+      display: none;
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 18px;
+      background: var(--surface-muted);
+      border: 1px solid var(--line);
+    }
+
+    .progress-wrap.active { display: block; }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      transition: width 180ms ease;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      min-height: 52px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 180ms ease, opacity 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      transform: none;
+    }
+
+    .btn-primary {
+      color: white;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 14px 30px rgba(17, 24, 39, 0.14);
+    }
+
+    .btn-primary:hover:not(:disabled),
+    .btn-primary:focus-visible:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 36px rgba(17, 24, 39, 0.2);
+      outline: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    .btn-secondary:hover:not(:disabled),
+    .btn-secondary:focus-visible:not(:disabled) {
+      transform: translateY(-2px);
+      outline: none;
+      border-color: var(--line-strong);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .btn-inline {
+      padding: 12px 14px;
+      min-height: 44px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .btn-inline:hover,
+    .btn-inline:focus-visible {
+      transform: translateY(-2px);
+      outline: none;
+      border-color: var(--line-strong);
+    }
+
+    .notice-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .notice {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .notice.active { display: block; }
+    .notice.error { color: var(--error); background: color-mix(in srgb, var(--error) 9%, transparent); border-color: color-mix(in srgb, var(--error) 18%, transparent); }
+    .notice.success { color: var(--success); background: color-mix(in srgb, var(--success) 10%, transparent); border-color: color-mix(in srgb, var(--success) 18%, transparent); }
+    .notice.info { color: var(--text-muted); background: var(--surface-muted); border-color: var(--line); }
+
+    .output-stage {
+      min-height: 620px;
+      display: grid;
+      align-items: stretch;
+    }
+
+    .empty-state,
+    .result-shell,
+    .result-skeleton {
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: var(--surface-muted);
+      min-height: 100%;
+    }
+
+    .empty-state {
+      display: grid;
+      place-items: center;
+      padding: 32px;
+      text-align: center;
+    }
+
+    .empty-state .empty-box {
+      max-width: 420px;
+      display: grid;
+      gap: 16px;
+      justify-items: center;
+    }
+
+    .empty-icon {
+      width: 82px;
+      height: 82px;
+      border-radius: 28px;
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.12), rgba(45, 212, 191, 0.08));
+      border: 1px solid var(--line);
+    }
+
+    .empty-state h4 {
+      font-size: 28px;
+      letter-spacing: -0.04em;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      line-height: 1.75;
+      font-size: 15px;
+      max-width: 42ch;
+    }
+
+    .result-skeleton {
+      display: none;
+      overflow: hidden;
+    }
+
+    .result-skeleton.active { display: block; }
+
+    .skeleton-shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 80%);
+      background-size: 220% 100%;
+      animation: shimmer 1.3s linear infinite;
+      border-radius: 18px;
+    }
+
+    .skeleton-image { aspect-ratio: 16 / 9; }
+    .skeleton-content { padding: 20px; display: grid; gap: 14px; }
+    .skeleton-line { height: 14px; }
+    .skeleton-line.short { width: 38%; }
+    .skeleton-line.mid { width: 68%; }
+    .skeleton-line.long { width: 100%; }
+
+    .result-shell {
+      display: none;
+      overflow: hidden;
+      animation: fadeInUp 420ms ease;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .result-shell.active { display: block; }
+
+    .result-hero {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: #0b1220;
+      overflow: hidden;
+    }
+
+    .result-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.01);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8, 16, 24, 0.03), rgba(8, 16, 24, 0.62));
+    }
+
+    .hero-topline,
+    .hero-bottomline {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      z-index: 1;
+    }
+
+    .hero-topline { top: 18px; }
+    .hero-bottomline { bottom: 18px; align-items: end; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: white;
+      background: rgba(8, 16, 24, 0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero-title-wrap {
+      color: white;
+      max-width: 68%;
+    }
+
+    .hero-title-wrap h4 {
+      font-size: clamp(26px, 4vw, 40px);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+      margin-bottom: 10px;
+    }
+
+    .hero-title-wrap p {
+      color: rgba(255,255,255,0.78);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .ad-panel {
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .meta-chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .ad-copy {
+      padding: 20px;
+      border-radius: 20px;
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+    }
+
+    .ad-copy h5 {
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .ad-text {
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.9;
+    }
+
+    .ad-text p + p {
+      margin-top: 14px;
+    }
+
+    .ad-text strong {
+      color: var(--brand-2);
+      font-weight: 700;
+    }
+
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(8, 16, 24, 0.26);
+      backdrop-filter: blur(4px);
+      z-index: 10;
+    }
+
+    .overlay.active { display: grid; }
+
+    .spinner-card {
+      padding: 18px 20px;
+      border-radius: 20px;
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-lg);
+      max-width: 320px;
+    }
+
+    .spinner {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,0.16);
+      border-top-color: var(--brand-2);
+      animation: spin 900ms linear infinite;
+      flex: 0 0 auto;
+    }
+
+    .spinner-copy strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .spinner-copy span {
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .toast-stack {
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      z-index: 99;
+      display: grid;
+      gap: 10px;
+      width: min(360px, calc(100vw - 24px));
+    }
+
+    .toast {
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--surface-strong);
+      box-shadow: var(--shadow-lg);
+      animation: fadeInUp 260ms ease;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .toast strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .toast.success strong { color: var(--success); }
+    .toast.error strong { color: var(--error); }
+    .toast.info strong { color: var(--brand-2); }
+
+    .footer-note {
+      padding: 0 4px;
+      color: var(--text-faint);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 220% 0; }
+      100% { background-position: -220% 0; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 980px) {
+      body { padding: 16px; }
+      .hero-grid,
+      .workspace { grid-template-columns: 1fr; }
+      .hero-title-wrap { max-width: 100%; }
+      .output-stage { min-height: 0; }
+    }
+
+    @media (max-width: 640px) {
+      .topbar,
+      .panel,
+      .hero { padding: 18px; }
+      .actions { grid-template-columns: 1fr; }
+      .hero-bottomline,
+      .hero-topline { left: 14px; right: 14px; }
+      .hero-title-wrap h4 { font-size: 24px; }
+      .hero-title-wrap p { font-size: 13px; }
+      .result-actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .result-actions .btn-inline:first-child,
+      .result-actions .btn-inline:last-child { grid-column: span 2; }
+      .toast-stack { left: 12px; right: 12px; width: auto; top: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="page-shell">
+    <header class="topbar glass">
+      <div class="brand">
+        <div class="brand-mark">Z</div>
+        <div class="brand-copy">
+          <h1>Zuntra Ad Studio</h1>
+          <p>AI-powered real estate advertisement generator</p>
+        </div>
+      </div>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">◐</button>
+    </header>
+
+    <section class="hero glass">
+      <div class="eyebrow">Premium property marketing workflow</div>
+      <div class="hero-grid">
+        <div>
+          <h2>Turn a property photo into an <span>investor-ready</span> advertisement.</h2>
+          <p>
+            Keep your existing backend flow, upload the image to Cloudinary, send the returned URL to your Flask endpoint,
+            and present the generated copy inside a polished real-estate showcase card.
+          </p>
+        </div>
+        <div class="hero-stats">
+          <article class="stat-card">
+            <strong>2-step</strong>
+            <span>Cloudinary upload first, Flask generation second—same architecture, cleaner execution.</span>
+          </article>
+          <article class="stat-card">
+            <strong>Pro UI</strong>
+            <span>Drag and drop upload, premium result states, responsive layout, and modern content actions.</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <main class="workspace">
+      <section class="panel glass" aria-labelledby="generatorTitle">
+        <div class="panel-title">
+          <div>
+            <h3 id="generatorTitle">Generate property advertisement</h3>
+            <p>Upload one high-quality property image and generate polished ad copy through your existing Flask API.</p>
+          </div>
+          <div class="pill">Cloudinary → Flask</div>
+        </div>
+
+        <div class="field">
+          <label for="propertyId">
+            <span>Property ID</span>
+            <span>Required</span>
+          </label>
+          <input class="input" type="number" id="propertyId" placeholder="Example: 101" min="1" inputmode="numeric" />
+        </div>
+
+        <div class="field">
+          <label for="imageFile">
+            <span>Property image</span>
+            <span>PNG, JPG, WEBP · Max 8 MB</span>
+          </label>
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload property image">
+            <input type="file" id="imageFile" accept="image/png,image/jpeg,image/jpg,image/webp" />
+            <div class="dropzone-visual">
+              <div class="drop-icon">⬆</div>
+              <strong>Drop your image here</strong>
+              <span>or click to browse. We will preview the file locally, upload it to Cloudinary, and pass the returned URL to your Flask backend.</span>
+            </div>
+          </div>
+
+          <div class="preview-card" id="previewCard">
+            <img id="previewImg" alt="Selected property preview" />
+            <div class="preview-meta">
+              <span id="fileMeta">No file selected</span>
+              <button class="btn-inline" type="button" id="removeFileBtn">Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap" aria-live="polite">
+          <div class="progress-top">
+            <span id="progressLabel">Preparing upload...</span>
+            <span id="progressPercent">0%</span>
+          </div>
+          <div class="progress-bar" aria-hidden="true">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="generateBtn" type="button">Generate advertisement</button>
+          <button class="btn btn-secondary" id="cancelBtn" type="button" disabled>Cancel</button>
+        </div>
+
+        <div class="notice-stack">
+          <div class="notice info" id="infoNotice"></div>
+          <div class="notice success" id="successNotice"></div>
+          <div class="notice error" id="errorNotice"></div>
+        </div>
+      </section>
+
+      <section class="panel glass output-stage" aria-labelledby="resultTitle">
+        <div class="panel-title">
+          <div>
+            <h3 id="resultTitle">Advertisement preview</h3>
+            <p>Investor-presentation quality output with image hero, premium ad layout, and utility actions.</p>
+          </div>
+          <div class="pill">AI output card</div>
+        </div>
+
+        <div class="overlay" id="panelOverlay" aria-hidden="true">
+          <div class="spinner-card">
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="spinner-copy">
+              <strong id="overlayTitle">Working on your request</strong>
+              <span id="overlayText">Uploading property image and preparing advertisement.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <div class="empty-box">
+            <div class="empty-icon">⌂</div>
+            <h4>Ready for your next listing.</h4>
+            <p>
+              Add a property ID, drop a clean property photo, and Zuntra will generate a polished advertisement card without changing your backend API flow.
+            </p>
+          </div>
+        </div>
+
+        <div class="result-skeleton" id="resultSkeleton" aria-hidden="true">
+          <div class="skeleton-image skeleton-shimmer"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-line short skeleton-shimmer"></div>
+            <div class="skeleton-line mid skeleton-shimmer"></div>
+            <div class="skeleton-line long skeleton-shimmer"></div>
+            <div class="skeleton-line long skeleton-shimmer"></div>
+            <div class="skeleton-line mid skeleton-shimmer"></div>
+          </div>
+        </div>
+
+        <article class="result-shell" id="resultCard">
+          <div class="result-hero">
+            <img id="adImage" alt="Generated property advertisement visual" />
+            <div class="hero-overlay"></div>
+            <div class="hero-topline">
+              <div class="badge">AI Generated</div>
+              <div class="badge" id="resultTime">Ready now</div>
+            </div>
+            <div class="hero-bottomline">
+              <div class="hero-title-wrap">
+                <h4 id="resultHeadline">Property advertisement</h4>
+                <p id="resultSubline">Generated from your existing backend pipeline.</p>
+              </div>
+              <div class="badge" id="resultPropertyBadge">Property #—</div>
+            </div>
+          </div>
+
+          <div class="ad-panel">
+            <div class="meta-row" id="metaRow">
+              <div class="meta-chip">Cloudinary upload complete</div>
+              <div class="meta-chip">Flask response rendered</div>
+              <div class="meta-chip">Ready to share</div>
+            </div>
+
+            <div class="ad-copy">
+              <h5>Advertisement copy</h5>
+              <div class="ad-text" id="adText"></div>
+            </div>
+
+            <div class="result-actions">
+              <button class="btn-inline" type="button" id="copyBtn">Copy text</button>
+              <button class="btn-inline" type="button" id="shareBtn">Share</button>
+              <button class="btn-inline" type="button" id="downloadBtn">Download ad</button>
+              <button class="btn-inline" type="button" id="retryBtn">Retry generation</button>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <p class="footer-note">
+      Built as a single-file frontend with the same request sequence as your current version: local preview → Cloudinary upload → Flask advertisement generation.
+    </p>
+  </div>
+
+  <script>
+    const CONFIG = {
+      CLOUDINARY_URL: "https://api.cloudinary.com/v1_1/dlafd1hxn/image/upload",
+      CLOUDINARY_UPLOAD_PRESET: "realestate",
+      GENERATE_AD_URL: "http://127.0.0.1:5000/generate-ad",
+      MAX_IMAGE_SIZE_MB: 8,
+      BACKEND_TIMEOUT_MS: 20000,
+      CLOUDINARY_TIMEOUT_MS: 45000,
+      MAX_RETRIES: 1,
+    };
+
+    const state = {
+      file: null,
+      previewUrl: "",
+      activeUploadXhr: null,
+      activeBackendController: null,
+      isSubmitting: false,
+      lastPayload: null,
+      result: null,
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    const els = {
+      themeToggle: $("themeToggle"),
+      propertyId: $("propertyId"),
+      imageFile: $("imageFile"),
+      dropzone: $("dropzone"),
+      previewCard: $("previewCard"),
+      previewImg: $("previewImg"),
+      fileMeta: $("fileMeta"),
+      removeFileBtn: $("removeFileBtn"),
+      generateBtn: $("generateBtn"),
+      cancelBtn: $("cancelBtn"),
+      progressWrap: $("progressWrap"),
+      progressLabel: $("progressLabel"),
+      progressPercent: $("progressPercent"),
+      progressFill: $("progressFill"),
+      infoNotice: $("infoNotice"),
+      successNotice: $("successNotice"),
+      errorNotice: $("errorNotice"),
+      emptyState: $("emptyState"),
+      resultSkeleton: $("resultSkeleton"),
+      resultCard: $("resultCard"),
+      adImage: $("adImage"),
+      adText: $("adText"),
+      resultHeadline: $("resultHeadline"),
+      resultSubline: $("resultSubline"),
+      resultPropertyBadge: $("resultPropertyBadge"),
+      resultTime: $("resultTime"),
+      retryBtn: $("retryBtn"),
+      copyBtn: $("copyBtn"),
+      shareBtn: $("shareBtn"),
+      downloadBtn: $("downloadBtn"),
+      metaRow: $("metaRow"),
+      panelOverlay: $("panelOverlay"),
+      overlayTitle: $("overlayTitle"),
+      overlayText: $("overlayText"),
+      toastStack: $("toastStack"),
+    };
+
+    initialize();
+
+    function initialize() {
+      syncThemeWithSystem();
+      bindEvents();
+    }
+
+    function bindEvents() {
+      els.themeToggle.addEventListener("click", toggleTheme);
+      els.imageFile.addEventListener("change", (event) => handleSelectedFile(event.target.files?.[0] || null));
+      els.removeFileBtn.addEventListener("click", clearFileSelection);
+      els.generateBtn.addEventListener("click", () => generateAdvertisement());
+      els.cancelBtn.addEventListener("click", cancelActiveRequests);
+      els.retryBtn.addEventListener("click", retryLastRequest);
+      els.copyBtn.addEventListener("click", copyAdvertisement);
+      els.shareBtn.addEventListener("click", shareAdvertisement);
+      els.downloadBtn.addEventListener("click", downloadAdvertisement);
+
+      ["dragenter", "dragover"].forEach((type) => {
+        els.dropzone.addEventListener(type, (event) => {
+          event.preventDefault();
+          els.dropzone.classList.add("dragover");
+        });
+      });
+
+      ["dragleave", "drop"].forEach((type) => {
+        els.dropzone.addEventListener(type, (event) => {
+          event.preventDefault();
+          if (type !== "drop") els.dropzone.classList.remove("dragover");
+        });
+      });
+
+      els.dropzone.addEventListener("drop", (event) => {
+        const file = event.dataTransfer?.files?.[0] || null;
+        els.dropzone.classList.remove("dragover");
+        if (file) {
+          els.imageFile.files = event.dataTransfer.files;
+          handleSelectedFile(file);
+        }
+      });
+
+      els.dropzone.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          els.imageFile.click();
+        }
+      });
+    }
+
+    function syncThemeWithSystem() {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+    }
+
+    function toggleTheme() {
+      const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      toast("Theme updated", next === "dark" ? "Dark mode enabled." : "Light mode enabled.", "info");
+    }
+
+    function setNotice(type, message) {
+      clearNotices();
+      if (!message) return;
+      const target = type === "error" ? els.errorNotice : type === "success" ? els.successNotice : els.infoNotice;
+      target.textContent = message;
+      target.classList.add("active");
+    }
+
+    function clearNotices() {
+      [els.infoNotice, els.successNotice, els.errorNotice].forEach((node) => {
+        node.textContent = "";
+        node.classList.remove("active");
+      });
+    }
+
+    function toast(title, message, type = "info") {
+      const node = document.createElement("div");
+      node.className = `toast ${type}`;
+      node.innerHTML = `<strong>${escapeHtml(title)}</strong><span>${escapeHtml(message)}</span>`;
+      els.toastStack.appendChild(node);
+      setTimeout(() => node.remove(), 3200);
+    }
+
+    function handleSelectedFile(file) {
+      clearNotices();
+      if (!file) {
+        clearFileSelection();
+        return;
+      }
+
+      const validationError = validateImage(file);
+      if (validationError) {
+        clearFileSelection();
+        setNotice("error", validationError);
+        toast("Invalid image", validationError, "error");
+        return;
+      }
+
+      if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+      state.file = file;
+      state.previewUrl = URL.createObjectURL(file);
+      els.previewImg.src = state.previewUrl;
+      els.fileMeta.textContent = `${file.name} • ${formatBytes(file.size)}`;
+      els.previewCard.classList.add("active");
+      setNotice("success", "Image validated and ready for upload.");
+    }
+
+    function clearFileSelection() {
+      if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+      state.file = null;
+      state.previewUrl = "";
+      els.previewImg.removeAttribute("src");
+      els.imageFile.value = "";
+      els.fileMeta.textContent = "No file selected";
+      els.previewCard.classList.remove("active");
+    }
+
+    function validateImage(file) {
+      const accepted = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+      const maxSize = CONFIG.MAX_IMAGE_SIZE_MB * 1024 * 1024;
+      if (!accepted.includes(file.type)) return "Please upload a PNG, JPG, or WEBP image.";
+      if (file.size > maxSize) return `Image must be smaller than ${CONFIG.MAX_IMAGE_SIZE_MB} MB.`;
+      return "";
+    }
+
+    function setSubmitting(isSubmitting, overlayTitle = "", overlayText = "") {
+      state.isSubmitting = isSubmitting;
+      els.generateBtn.disabled = isSubmitting;
+      els.cancelBtn.disabled = !isSubmitting;
+      els.propertyId.disabled = isSubmitting;
+      els.imageFile.disabled = isSubmitting;
+      if (isSubmitting) {
+        els.panelOverlay.classList.add("active");
+        els.overlayTitle.textContent = overlayTitle || "Working on your request";
+        els.overlayText.textContent = overlayText || "Please wait while we process your image and ad copy.";
+      } else {
+        els.panelOverlay.classList.remove("active");
+      }
+    }
+
+    function setProgress(percentage, label) {
+      els.progressWrap.classList.add("active");
+      const clamped = Math.max(0, Math.min(100, Math.round(percentage)));
+      els.progressFill.style.width = `${clamped}%`;
+      els.progressPercent.textContent = `${clamped}%`;
+      els.progressLabel.textContent = label;
+    }
+
+    function resetProgress() {
+      els.progressWrap.classList.remove("active");
+      els.progressFill.style.width = "0%";
+      els.progressPercent.textContent = "0%";
+      els.progressLabel.textContent = "Preparing upload...";
+    }
+
+    function showSkeleton() {
+      els.emptyState.style.display = "none";
+      els.resultCard.classList.remove("active");
+      els.resultSkeleton.classList.add("active");
+    }
+
+    function hideSkeleton() {
+      els.resultSkeleton.classList.remove("active");
+    }
+
+    function showEmptyState() {
+      hideSkeleton();
+      els.resultCard.classList.remove("active");
+      els.emptyState.style.display = "grid";
+    }
+
+    async function generateAdvertisement(retryCount = 0) {
+      clearNotices();
+
+      const propertyId = els.propertyId.value.trim();
+      if (!propertyId || Number(propertyId) <= 0) {
+        setNotice("error", "Please enter a valid property ID.");
+        toast("Missing property ID", "Enter a valid property ID to continue.", "error");
+        return;
+      }
+
+      if (!state.file) {
+        setNotice("error", "Please upload a property image before generating the advertisement.");
+        toast("Missing image", "Upload a property image to continue.", "error");
+        return;
+      }
+
+      state.lastPayload = { propertyId, file: state.file };
+      showSkeleton();
+      setSubmitting(true, "Generating premium advertisement", "Uploading image to Cloudinary, then calling your Flask API.");
+      setProgress(5, "Preparing file...");
+      setNotice("info", "Starting upload...");
+
+      try {
+        const imageUrl = await uploadToCloudinary(state.file);
+        setProgress(92, "Generating advertisement from backend...");
+        setNotice("info", "Image uploaded. Waiting for ad generation...");
+
+        const data = await postGenerateAd({ propertyId, imagePath: imageUrl });
+        renderResult({ ...data, propertyId, uploadedImageUrl: imageUrl });
+        setProgress(100, "Advertisement ready.");
+        setNotice("success", "Advertisement generated successfully.");
+        toast("Advertisement ready", "Your AI-generated property advertisement has been rendered.", "success");
+      } catch (error) {
+        if (error.name === "AbortError") {
+          setNotice("error", "Request cancelled or timed out.");
+          toast("Request stopped", "The current request was cancelled or timed out.", "error");
+        } else if (retryCount < CONFIG.MAX_RETRIES) {
+          setNotice("info", "Request failed once. Retrying automatically...");
+          toast("Retrying request", "We hit a temporary issue and are retrying once.", "info");
+          resetNetworkHandles();
+          return generateAdvertisement(retryCount + 1);
+        } else {
+          const message = error.message || "Unexpected server error.";
+          setNotice("error", message);
+          toast("Generation failed", message, "error");
+          showEmptyState();
+        }
+      } finally {
+        resetNetworkHandles();
+        setSubmitting(false);
+        setTimeout(() => resetProgress(), 800);
+      }
+    }
+
+    function retryLastRequest() {
+      if (state.isSubmitting) return;
+      if (!state.lastPayload) {
+        toast("Nothing to retry", "Generate at least one advertisement first.", "info");
+        return;
+      }
+      els.propertyId.value = state.lastPayload.propertyId;
+      generateAdvertisement(0);
+    }
+
+    function uploadToCloudinary(file) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        state.activeUploadXhr = xhr;
+        xhr.open("POST", CONFIG.CLOUDINARY_URL, true);
+        xhr.timeout = CONFIG.CLOUDINARY_TIMEOUT_MS;
+
+        xhr.upload.onprogress = (event) => {
+          if (!event.lengthComputable) return;
+          const ratio = (event.loaded / event.total) * 75;
+          setProgress(ratio, "Uploading image to Cloudinary...");
+        };
+
+        xhr.onload = () => {
+          try {
+            const data = JSON.parse(xhr.responseText || "{}");
+            if (xhr.status >= 200 && xhr.status < 300 && data.secure_url) {
+              resolve(data.secure_url);
+            } else {
+              reject(new Error(data.error?.message || "Cloudinary upload failed."));
+            }
+          } catch {
+            reject(new Error("Could not parse Cloudinary response."));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("Cloudinary upload failed due to a network error."));
+        xhr.ontimeout = () => reject(new DOMException("Cloudinary upload timed out.", "AbortError"));
+        xhr.onabort = () => reject(new DOMException("Cloudinary upload was aborted.", "AbortError"));
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", CONFIG.CLOUDINARY_UPLOAD_PRESET);
+        xhr.send(formData);
+      });
+    }
+
+    async function postGenerateAd(payload) {
+      const controller = new AbortController();
+      state.activeBackendController = controller;
+      const timeoutId = setTimeout(() => controller.abort(), CONFIG.BACKEND_TIMEOUT_MS);
+
+      try {
+        const response = await fetch(CONFIG.GENERATE_AD_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            propertyId: Number(payload.propertyId),
+            imagePath: payload.imagePath,
+          }),
+          signal: controller.signal,
+        });
+
+        let data = {};
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("Backend returned a non-JSON response.");
+        }
+
+        if (!response.ok) throw new Error(data.error || "Backend request failed.");
+        if (data.error) throw new Error(data.error);
+        return data;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    function cancelActiveRequests() {
+      if (state.activeUploadXhr) state.activeUploadXhr.abort();
+      if (state.activeBackendController) state.activeBackendController.abort();
+    }
+
+    function resetNetworkHandles() {
+      state.activeUploadXhr = null;
+      state.activeBackendController = null;
+    }
+
+    function renderResult(data) {
+      state.result = data;
+      hideSkeleton();
+      els.emptyState.style.display = "none";
+      els.resultCard.classList.add("active");
+
+      els.adImage.src = data.imageUrl || data.uploadedImageUrl;
+      els.adImage.alt = `Property advertisement image for property ${data.propertyId}`;
+      els.resultPropertyBadge.textContent = `Property #${data.propertyId}`;
+      els.resultTime.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      els.resultHeadline.textContent = buildHeadline(data);
+      els.resultSubline.textContent = "Generated from your Cloudinary image upload and Flask AI advertisement endpoint.";
+      els.adText.innerHTML = formatAdvertisementHtml(data.advertisement || "No advertisement text returned.");
+
+      els.metaRow.innerHTML = [
+        `<div class="meta-chip">AI generated copy</div>`,
+        `<div class="meta-chip">Image URL secured</div>`,
+        `<div class="meta-chip">Property ID: ${escapeHtml(String(data.propertyId))}</div>`,
+      ].join("");
+    }
+
+    function buildHeadline(data) {
+      const ad = (data.advertisement || "").trim();
+      if (!ad) return "Property advertisement";
+      const firstSentence = ad.split(/\n|\./).find(Boolean)?.trim() || "Property advertisement";
+      return firstSentence.length > 72 ? `${firstSentence.slice(0, 69)}...` : firstSentence;
+    }
+
+    function formatAdvertisementHtml(text) {
+      const safe = escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\n{2,}/g, "</p><p>")
+        .replace(/\n/g, "<br>");
+      return `<p>${safe}</p>`;
+    }
+
+    async function copyAdvertisement() {
+      if (!state.result?.advertisement) return;
+      try {
+        await navigator.clipboard.writeText(state.result.advertisement);
+        toast("Copied", "Advertisement text copied to clipboard.", "success");
+      } catch {
+        toast("Copy failed", "Clipboard access is unavailable in this browser.", "error");
+      }
+    }
+
+    async function shareAdvertisement() {
+      if (!state.result?.advertisement) return;
+      const shareData = {
+        title: `Zuntra Property #${state.result.propertyId}`,
+        text: state.result.advertisement,
+        url: state.result.imageUrl,
+      };
+
+      try {
+        if (navigator.share) {
+          await navigator.share(shareData);
+          toast("Shared", "Advertisement shared successfully.", "success");
+        } else {
+          await navigator.clipboard.writeText(`${shareData.title}\n\n${shareData.text}\n\n${shareData.url || ""}`);
+          toast("Link copied", "Share API unavailable. Copied content instead.", "info");
+        }
+      } catch {
+        toast("Share cancelled", "Sharing was cancelled or unavailable.", "info");
+      }
+    }
+
+    function downloadAdvertisement() {
+      if (!state.result?.advertisement) return;
+      const fileName = `zuntra-property-${state.result.propertyId}-advertisement.html`;
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(`Zuntra Advertisement ${state.result.propertyId}`)}</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f5f7fb;padding:32px;color:#111827}
+.card{max-width:900px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.12)}
+img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.content{padding:28px}
+.badge{display:inline-block;padding:8px 12px;border-radius:999px;background:#0f766e;color:#fff;font-size:12px;font-weight:700;margin-bottom:16px}
+h1{font-size:32px;line-height:1.1;margin:0 0 16px}
+p{font-size:16px;line-height:1.8;color:#374151}
+small{display:block;margin-top:18px;color:#6b7280}
+</style>
+</head>
+<body>
+  <article class="card">
+    <img src="${escapeHtml(state.result.imageUrl || "")}" alt="Property image">
+    <div class="content">
+      <div class="badge">AI Generated Advertisement</div>
+      <h1>Property #${escapeHtml(String(state.result.propertyId))}</h1>
+      <p>${escapeHtml(state.result.advertisement).replace(/\n/g, "<br><br>")}</p>
+      <small>Generated by Zuntra Ad Studio</small>
+    </div>
+  </article>
+</body>
+</html>`;
+
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast("Downloaded", "Advertisement file downloaded successfully.", "success");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return `${bytes} B`;
+      const units = ["KB", "MB", "GB"];
+      let size = bytes / 1024;
+      let unitIndex = 0;
+      while (size >= 1024 && unitIndex < units.length - 1) {
+        size /= 1024;
+        unitIndex += 1;
+      }
+      return `${size.toFixed(size < 10 ? 1 : 0)} ${units[unitIndex]}`;
+    }
+  </script>
+</body>
+</html>

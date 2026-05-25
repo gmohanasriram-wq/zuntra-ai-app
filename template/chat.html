@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RentIT — AI Real Estate Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --gold:       #C9A84C;
+      --gold-light: #e8c97a;
+      --dark:       #0E0E12;
+      --dark2:      #17171D;
+      --dark3:      #21212B;
+      --surface:    #2A2A36;
+      --border:     rgba(201,168,76,0.18);
+      --text:       #F0EDE8;
+      --muted:      #8A8799;
+      --white:      #ffffff;
+      --radius:     16px;
+      --shadow:     0 24px 60px rgba(0,0,0,0.5);
+    }
+    *{ margin:0; padding:0; box-sizing:border-box; }
+    body{
+      font-family:'DM Sans',sans-serif;
+      background: var(--dark);
+      min-height:100vh;
+      overflow:hidden;
+      position:relative;
+    }
+    body::before{
+      content:'';
+      position:fixed;
+      width:600px; height:600px;
+      border-radius:50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%);
+      top:-150px; right:-150px;
+      pointer-events:none;
+    }
+    body::after{
+      content:'';
+      position:fixed;
+      width:400px; height:400px;
+      border-radius:50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+      bottom:-100px; left:-100px;
+      pointer-events:none;
+    }
+    .page{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: opacity .45s ease, transform .45s ease;
+    }
+    .page.hidden{
+      opacity:0;
+      pointer-events:none;
+      transform: translateY(20px);
+    }
+
+    /* LOGIN */
+    #loginPage{ flex-direction:row; gap:0; }
+    .hero-panel{
+      width:420px;
+      min-height:560px;
+      background: linear-gradient(145deg, #1a1610 0%, #2c2209 50%, #1a1610 100%);
+      border:1px solid var(--border);
+      border-radius: var(--radius) 0 0 var(--radius);
+      padding:52px 40px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero-panel::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.06) 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+    .brand{ position:relative; z-index:1; }
+    .brand-logo{ display:flex; align-items:center; gap:10px; margin-bottom:48px; }
+    .brand-icon{
+      width:42px; height:42px;
+      background: var(--gold);
+      border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px;
+      box-shadow:0 4px 20px rgba(201,168,76,0.35);
+    }
+    .brand-name{ font-family:'Playfair Display',serif; font-size:26px; color:var(--gold); letter-spacing:1px; }
+    .hero-headline{ font-family:'Playfair Display',serif; font-size:36px; line-height:1.25; color:var(--text); margin-bottom:18px; }
+    .hero-headline span{ color:var(--gold); }
+    .hero-sub{ font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:36px; }
+    .hero-pills{ display:flex; flex-wrap:wrap; gap:8px; }
+    .pill{ background:rgba(201,168,76,0.1); border:1px solid var(--border); color:var(--gold-light); font-size:12px; padding:6px 14px; border-radius:20px; }
+    .hero-stats{ position:relative; z-index:1; display:flex; gap:28px; }
+    .stat-item{ display:flex; flex-direction:column; gap:2px; }
+    .stat-num{ font-family:'Playfair Display',serif; font-size:24px; color:var(--gold); }
+    .stat-label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; }
+    .form-panel{
+      width:380px;
+      min-height:560px;
+      background:var(--dark2);
+      border:1px solid var(--border);
+      border-left:none;
+      border-radius:0 var(--radius) var(--radius) 0;
+      padding:48px 40px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .form-title{ font-family:'Playfair Display',serif; font-size:26px; color:var(--text); margin-bottom:6px; }
+    .form-sub{ font-size:13px; color:var(--muted); margin-bottom:32px; }
+    .field{ margin-bottom:18px; }
+    .field label{ display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); margin-bottom:8px; }
+    .field input{
+      width:100%;
+      background:var(--dark3);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:10px;
+      padding:14px 16px;
+      color:var(--text);
+      font-size:14px;
+      font-family:'DM Sans',sans-serif;
+      outline:none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input::placeholder{ color:var(--muted); }
+    .field input:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,168,76,0.12); }
+    .btn-primary{
+      width:100%;
+      padding:15px;
+      background: linear-gradient(135deg, var(--gold) 0%, #a8802a 100%);
+      border:none;
+      border-radius:10px;
+      color:#0E0E12;
+      font-size:15px;
+      font-weight:700;
+      font-family:'DM Sans',sans-serif;
+      cursor:pointer;
+      margin-top:8px;
+      letter-spacing:.3px;
+      transition: transform .15s, box-shadow .2s, opacity .2s;
+      box-shadow:0 6px 24px rgba(201,168,76,0.3);
+    }
+    .btn-primary:hover{ transform:translateY(-1px); box-shadow:0 10px 32px rgba(201,168,76,0.45); }
+    .btn-primary:active{ transform:translateY(0); }
+    .btn-primary:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+    .form-note{ text-align:center; font-size:12px; color:var(--muted); margin-top:20px; }
+
+    /* CHAT PAGE */
+    #chatPage{ align-items:stretch; padding:0; }
+    .chat-wrapper{ width:100vw; height:100vh; display:flex; flex-direction:column; background:var(--dark); }
+
+    .chat-header{
+      background:var(--dark2);
+      border-bottom:1px solid var(--border);
+      padding:0 28px;
+      height:68px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      flex-shrink:0;
+    }
+    .header-left{ display:flex; align-items:center; gap:14px; }
+    .header-avatar{
+      width:42px; height:42px;
+      background: linear-gradient(135deg, var(--gold), #a8802a);
+      border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px;
+      box-shadow:0 4px 16px rgba(201,168,76,0.3);
+      flex-shrink:0;
+    }
+    .header-name{ font-family:'Playfair Display',serif; font-size:18px; color:var(--text); line-height:1.2; }
+    .header-status{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+    .status-dot{ width:7px; height:7px; border-radius:50%; background:#4ade80; box-shadow:0 0 6px #4ade8088; animation: pulse-dot 2s ease-in-out infinite; }
+    @keyframes pulse-dot{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
+
+    .header-right{ display:flex; align-items:center; gap:12px; }
+
+    /* LANGUAGE SWITCHER */
+    .lang-switcher{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      background:var(--dark3);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:4px 6px;
+    }
+    .lang-btn{
+      background:transparent;
+      border:none;
+      color:var(--muted);
+      font-size:11px;
+      font-family:'DM Sans',sans-serif;
+      font-weight:600;
+      padding:5px 9px;
+      border-radius:7px;
+      cursor:pointer;
+      transition:all .2s;
+      white-space:nowrap;
+    }
+    .lang-btn.active{
+      background:var(--gold);
+      color:#0E0E12;
+    }
+    .lang-btn:hover:not(.active){ color:var(--gold-light); }
+
+    .voice-lang-select{
+      background:var(--dark3);
+      border:1px solid var(--border);
+      color:var(--text);
+      font-size:12px;
+      font-family:'DM Sans',sans-serif;
+      padding:6px 10px;
+      border-radius:8px;
+      outline:none;
+      cursor:pointer;
+    }
+    .voice-lang-select option{ background:var(--dark2); }
+
+    .btn-logout{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.1);
+      color:var(--muted);
+      font-size:12px;
+      font-family:'DM Sans',sans-serif;
+      padding:8px 16px;
+      border-radius:8px;
+      cursor:pointer;
+      transition:all .2s;
+    }
+    .btn-logout:hover{ border-color:var(--gold); color:var(--gold); }
+
+    /* ASSISTANT CHIPS */
+    .assistant-bar{
+      background:rgba(201,168,76,0.06);
+      border-bottom:1px solid var(--border);
+      padding:8px 28px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-shrink:0;
+      overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .assistant-bar::-webkit-scrollbar{ display:none; }
+    .assistant-label{ font-size:11px; color:var(--muted); white-space:nowrap; text-transform:uppercase; letter-spacing:.6px; margin-right:4px; }
+    .asst-chip{
+      background:var(--dark3);
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-size:11px;
+      padding:5px 12px;
+      border-radius:20px;
+      white-space:nowrap;
+      cursor:pointer;
+      transition:all .2s;
+      flex-shrink:0;
+    }
+    .asst-chip.active{ background:rgba(201,168,76,0.15); border-color:var(--gold); color:var(--gold-light); }
+    .asst-chip:hover:not(.active){ border-color:rgba(201,168,76,0.4); color:var(--text); }
+
+    /* CHAT BODY */
+    .chat-body{
+      flex:1;
+      overflow-y:auto;
+      padding:28px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      scroll-behavior:smooth;
+    }
+    .chat-body::-webkit-scrollbar{ width:4px; }
+    .chat-body::-webkit-scrollbar-track{ background:transparent; }
+    .chat-body::-webkit-scrollbar-thumb{ background:var(--surface); border-radius:4px; }
+
+    .msg-row{ display:flex; gap:12px; animation: fadeSlideUp .3s ease forwards; opacity:0; }
+    @keyframes fadeSlideUp{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+    .msg-row.user{ flex-direction:row-reverse; }
+    .msg-avatar{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; margin-top:2px; }
+    .bot .msg-avatar{ background: linear-gradient(135deg, var(--gold), #a8802a); }
+    .user .msg-avatar{ background:var(--surface); }
+    .bubble{ max-width:68%; padding:14px 18px; border-radius:16px; font-size:14.5px; line-height:1.65; position:relative; }
+    .bot .bubble{ background:var(--dark3); border:1px solid var(--border); color:var(--text); border-top-left-radius:4px; }
+    .user .bubble{ background: linear-gradient(135deg, var(--gold) 0%, #a8802a 100%); color:#0E0E12; font-weight:500; border-top-right-radius:4px; box-shadow:0 4px 20px rgba(201,168,76,0.25); }
+    .bubble-meta{ font-size:10px; color:var(--muted); margin-top:6px; display:flex; align-items:center; gap:6px; }
+    .user .bubble-meta{ justify-content:flex-end; }
+    .assistant-tag{ background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.3); color:var(--gold-light); font-size:10px; padding:2px 8px; border-radius:8px; }
+    .audio-btn{ display:inline-flex; align-items:center; gap:6px; margin-top:10px; background:rgba(201,168,76,0.12); border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-size:12px; color:var(--gold-light); cursor:pointer; transition:all .2s; }
+    .audio-btn:hover{ background:rgba(201,168,76,0.22); }
+    .typing-indicator{ display:flex; gap:5px; align-items:center; padding:14px 18px; background:var(--dark3); border:1px solid var(--border); border-radius:16px; border-top-left-radius:4px; width:fit-content; }
+    .typing-dot{ width:7px; height:7px; border-radius:50%; background:var(--muted); animation: typingBounce 1.2s ease-in-out infinite; }
+    .typing-dot:nth-child(2){ animation-delay:.2s; }
+    .typing-dot:nth-child(3){ animation-delay:.4s; }
+    @keyframes typingBounce{ 0%,60%,100%{ transform:translateY(0); opacity:.4; } 30%{ transform:translateY(-6px); opacity:1; } }
+
+    /* CHAT FOOTER */
+    .chat-footer{ padding:18px 28px 22px; background:var(--dark2); border-top:1px solid var(--border); flex-shrink:0; }
+    .quick-chips{ display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+    .q-chip{ background:var(--dark3); border:1px solid var(--border); color:var(--muted); font-size:12px; padding:6px 14px; border-radius:20px; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; }
+    .q-chip:hover{ border-color:var(--gold); color:var(--gold-light); background:rgba(201,168,76,0.08); }
+    .input-row{ display:flex; gap:10px; align-items:center; }
+    .msg-input{ flex:1; background:var(--dark3); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px 18px; color:var(--text); font-size:14px; font-family:'DM Sans',sans-serif; outline:none; transition:border-color .2s, box-shadow .2s; }
+    .msg-input::placeholder{ color:var(--muted); }
+    .msg-input:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,168,76,0.1); }
+    .icon-btn{ width:48px; height:48px; border:none; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; transition:all .2s; flex-shrink:0; }
+    .btn-send{ background: linear-gradient(135deg, var(--gold), #a8802a); color:#0E0E12; box-shadow:0 4px 16px rgba(201,168,76,0.3); }
+    .btn-send:hover{ transform:scale(1.05); box-shadow:0 6px 22px rgba(201,168,76,0.45); }
+    .btn-mic{ background:var(--dark3); border:1px solid var(--border); color:var(--muted); }
+    .btn-mic:hover{ border-color:var(--gold); color:var(--gold); }
+    .btn-mic.recording{ background:rgba(239,68,68,0.15); border-color:#ef4444; color:#ef4444; animation: micPulse 1s ease-in-out infinite; }
+    @keyframes micPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(239,68,68,0.4); } 50%{ box-shadow:0 0 0 8px rgba(239,68,68,0); } }
+
+    /* TOAST */
+    .toast{ position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--dark3); border:1px solid var(--border); color:var(--text); padding:12px 22px; border-radius:10px; font-size:13px; opacity:0; transition:all .3s; pointer-events:none; z-index:999; box-shadow:0 8px 30px rgba(0,0,0,0.5); }
+    .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* WELCOME CARD */
+    .welcome-card{ background:var(--dark3); border:1px solid var(--border); border-radius:16px; padding:22px; max-width:380px; }
+    .welcome-card h3{ font-family:'Playfair Display',serif; font-size:18px; color:var(--text); margin-bottom:12px; }
+    .welcome-card h3 span{ color:var(--gold); }
+    .capability-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .cap-item{ background:rgba(201,168,76,0.06); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:7px; }
+    .cap-item span{ color:var(--gold); font-size:14px; }
+
+    /* AD MODAL */
+    .modal-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,0.75);
+      display:flex; align-items:center; justify-content:center;
+      z-index:200; opacity:0; pointer-events:none; transition:opacity .3s;
+    }
+    .modal-overlay.show{ opacity:1; pointer-events:all; }
+    .modal-box{
+      background:var(--dark2);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:32px;
+      width:500px;
+      max-width:95vw;
+      max-height:85vh;
+      overflow-y:auto;
+      position:relative;
+    }
+    .modal-title{ font-family:'Playfair Display',serif; font-size:22px; color:var(--text); margin-bottom:6px; }
+    .modal-sub{ font-size:13px; color:var(--muted); margin-bottom:24px; }
+    .modal-close{ position:absolute; top:16px; right:16px; background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:8px; padding:6px 12px; cursor:pointer; font-size:13px; transition:all .2s; }
+    .modal-close:hover{ color:var(--text); border-color:var(--gold); }
+
+    .upload-zone{
+      border:2px dashed var(--border);
+      border-radius:14px;
+      padding:32px 20px;
+      text-align:center;
+      cursor:pointer;
+      transition:all .2s;
+      margin-bottom:18px;
+      position:relative;
+    }
+    .upload-zone:hover{ border-color:var(--gold); background:rgba(201,168,76,0.04); }
+    .upload-zone.has-file{ border-color:var(--gold); background:rgba(201,168,76,0.08); }
+    .upload-icon{ font-size:36px; margin-bottom:10px; }
+    .upload-text{ font-size:14px; color:var(--muted); }
+    .upload-text strong{ color:var(--gold-light); }
+    .upload-preview{ width:100%; max-height:160px; object-fit:cover; border-radius:10px; margin-top:12px; display:none; }
+    #adImageInput{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+    .modal-field{ margin-bottom:14px; }
+    .modal-field label{ display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); margin-bottom:7px; }
+    .modal-field input, .modal-field textarea{
+      width:100%;
+      background:var(--dark3);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:10px;
+      padding:12px 15px;
+      color:var(--text);
+      font-size:13px;
+      font-family:'DM Sans',sans-serif;
+      outline:none;
+      resize:vertical;
+      transition:border-color .2s;
+    }
+    .modal-field input:focus, .modal-field textarea:focus{ border-color:var(--gold); }
+    .modal-field input::placeholder, .modal-field textarea::placeholder{ color:var(--muted); }
+
+    .modal-btn{
+      width:100%;
+      padding:14px;
+      background: linear-gradient(135deg, var(--gold), #a8802a);
+      border:none;
+      border-radius:10px;
+      color:#0E0E12;
+      font-size:14px;
+      font-weight:700;
+      font-family:'DM Sans',sans-serif;
+      cursor:pointer;
+      margin-top:6px;
+      transition:all .2s;
+    }
+    .modal-btn:hover{ transform:translateY(-1px); box-shadow:0 8px 24px rgba(201,168,76,0.4); }
+    .modal-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+    .modal-btn.secondary{
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--muted);
+      margin-top:8px;
+    }
+    .modal-btn.secondary:hover{ border-color:var(--gold); color:var(--gold-light); transform:none; box-shadow:none; }
+
+    .ad-result-box{
+      background:var(--dark3);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:16px;
+      margin-top:16px;
+      display:none;
+    }
+    .ad-result-box.show{ display:block; }
+    .ad-result-label{ font-size:11px; color:var(--gold); text-transform:uppercase; letter-spacing:.8px; font-weight:600; margin-bottom:8px; }
+    .ad-result-text{ font-size:13px; color:var(--text); line-height:1.7; white-space:pre-wrap; }
+    .ad-result-img{ width:100%; border-radius:10px; margin-bottom:12px; display:none; }
+
+    .draft-box{
+      background:rgba(201,168,76,0.06);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:16px;
+      margin-top:12px;
+      display:none;
+    }
+    .draft-box.show{ display:block; }
+    .draft-label{ font-size:11px; color:var(--gold); text-transform:uppercase; letter-spacing:.8px; font-weight:600; margin-bottom:8px; }
+    .draft-text{ font-size:13px; color:var(--text); line-height:1.7; white-space:pre-wrap; }
+
+    @media(max-width:820px){
+      .hero-panel{ display:none; }
+      .form-panel{ width:340px; border-radius:var(--radius); border-left:1px solid var(--border); }
+      .bubble{ max-width:82%; }
+      .chat-header{ padding:0 12px; height:58px; }
+      .chat-body{ padding:14px; }
+      .chat-footer{ padding:12px 14px 16px; }
+      .lang-btn{ font-size:10px; padding:4px 7px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- AD MODAL -->
+<div class="modal-overlay" id="adModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAdModal()">✕ Close</button>
+    <div class="modal-title" data-i18n="adModalTitle">📢 Generate Advertisement</div>
+    <div class="modal-sub" data-i18n="adModalSub">Upload property image & generate a professional ad + owner draft message</div>
+
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="adImageInput" accept="image/*" onchange="handleImageUpload(event)"/>
+      <div class="upload-icon">🖼️</div>
+      <div class="upload-text"><strong data-i18n="uploadClick">Click to upload</strong> <span data-i18n="uploadDrag">or drag & drop</span></div>
+      <div class="upload-text" style="font-size:12px;margin-top:4px;" data-i18n="uploadFormats">JPG, PNG, WEBP supported</div>
+      <img class="upload-preview" id="uploadPreview" src="" alt="Preview"/>
+    </div>
+
+    <div class="modal-field">
+      <label data-i18n="propNameLabel">Property Name</label>
+      <input type="text" id="adPropName" placeholder="e.g. Sunshine PG, Chennai"/>
+    </div>
+    <div class="modal-field">
+      <label data-i18n="propTypeLabel">Property Type</label>
+      <input type="text" id="adPropType" placeholder="e.g. 2BHK, PG, Villa"/>
+    </div>
+    <div class="modal-field">
+      <label data-i18n="propCityLabel">City & Locality</label>
+      <input type="text" id="adPropCity" placeholder="e.g. Velachery, Chennai"/>
+    </div>
+    <div class="modal-field">
+      <label data-i18n="propRentLabel">Monthly Rent (₹)</label>
+      <input type="number" id="adPropRent" placeholder="e.g. 12000"/>
+    </div>
+    <div class="modal-field">
+      <label data-i18n="propHighlightsLabel">Key Highlights</label>
+      <textarea id="adHighlights" rows="2" placeholder="e.g. Furnished, WiFi, 24/7 security, Near metro"></textarea>
+    </div>
+    <div class="modal-field">
+      <label data-i18n="ownerContactLabel">Owner Contact</label>
+      <input type="text" id="adOwnerContact" placeholder="e.g. 9876543210"/>
+    </div>
+
+    <button class="modal-btn" id="generateAdBtn" onclick="generateLocalAd()">✨ <span data-i18n="generateAdBtn">Generate Advertisement</span></button>
+
+    <div class="ad-result-box" id="adResultBox">
+      <img class="ad-result-img" id="adResultImg" src="" alt="Property"/>
+      <div class="ad-result-label" data-i18n="adResultLabel">📋 Generated Advertisement</div>
+      <div class="ad-result-text" id="adResultText"></div>
+      <button class="modal-btn secondary" style="margin-top:12px;" onclick="copyAd()">📋 <span data-i18n="copyAdBtn">Copy Ad</span></button>
+    </div>
+
+    <div class="draft-box" id="draftBox">
+      <div class="draft-label" data-i18n="draftLabel">💬 Draft Message to Owner</div>
+      <div class="draft-text" id="draftText"></div>
+      <button class="modal-btn secondary" onclick="copyDraft()">📋 <span data-i18n="copyDraftBtn">Copy Draft Message</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div class="page" id="loginPage">
+  <div class="hero-panel">
+    <div class="brand">
+      <div class="brand-logo">
+        <div class="brand-icon">🏠</div>
+        <div class="brand-name">RentIT</div>
+      </div>
+      <h1 class="hero-headline" data-i18n="heroHeadline">Find Your<br><span data-i18n="heroHeadlineSpan">Perfect Home</span><br><span data-i18n="heroHeadlineWith">with AI</span></h1>
+      <p class="hero-sub" data-i18n="heroSub">RentIT's AI assistant speaks your language, understands your needs, and finds you the right property — instantly.</p>
+      <div class="hero-pills">
+        <div class="pill" data-i18n="pill1">🗣 Voice Enabled</div>
+        <div class="pill" data-i18n="pill2">🌐 Multilingual</div>
+        <div class="pill" data-i18n="pill3">🤖 AI Powered</div>
+        <div class="pill" data-i18n="pill4">🏙 10 Assistants</div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num">10K+</div><div class="stat-label" data-i18n="stat1">Properties</div></div>
+      <div class="stat-item"><div class="stat-num">5</div><div class="stat-label" data-i18n="stat2">Languages</div></div>
+      <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-label" data-i18n="stat3">AI Support</div></div>
+    </div>
+  </div>
+  <div class="form-panel">
+    <div class="form-title" data-i18n="formTitle">Get Started</div>
+    <div class="form-sub" data-i18n="formSub">Enter your details to open your AI assistant</div>
+    <div class="field"><label data-i18n="labelName">Full Name</label><input type="text" id="name" placeholder="e.g. Arjun Kumar"/></div>
+    <div class="field"><label data-i18n="labelMobile">Mobile Number</label><input type="tel" id="mobile" placeholder="e.g. 9876543210"/></div>
+    <div class="field"><label data-i18n="labelCity">Your City</label><input type="text" id="city" placeholder="e.g. Chennai"/></div>
+    <button class="btn-primary" id="loginBtn" onclick="registerUser()"><span data-i18n="loginBtn">Open RentIT Assistant →</span></button>
+    <div class="form-note" data-i18n="formNote">Already registered? We'll log you in automatically.</div>
+  </div>
+</div>
+
+<!-- CHAT PAGE -->
+<div class="page hidden" id="chatPage">
+  <div class="chat-wrapper">
+    <div class="chat-header">
+      <div class="header-left">
+        <div class="header-avatar">🏠</div>
+        <div class="header-info">
+          <div class="header-name">RentIT</div>
+          <div class="header-status"><div class="status-dot"></div><span data-i18n="aiOnline">AI Assistant Online</span></div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="lang-switcher">
+          <button class="lang-btn active" onclick="setPageLang('en')">EN</button>
+          <button class="lang-btn" onclick="setPageLang('ta')">தமிழ்</button>
+          <button class="lang-btn" onclick="setPageLang('hi')">हिंदी</button>
+          <button class="lang-btn" onclick="setPageLang('te')">తెలుగు</button>
+          <button class="lang-btn" onclick="setPageLang('kn')">ಕನ್ನಡ</button>
+        </div>
+        <select class="voice-lang-select" id="langSelect" title="Voice input language">
+          <option value="en-IN">🎤 EN</option>
+          <option value="ta-IN">🎤 TA</option>
+          <option value="hi-IN">🎤 HI</option>
+          <option value="te-IN">🎤 TE</option>
+          <option value="kn-IN">🎤 KN</option>
+        </select>
+        <button class="btn-logout" onclick="logoutUser()" data-i18n="signOut">Sign Out</button>
+      </div>
+    </div>
+
+    <div class="assistant-bar">
+      <span class="assistant-label" data-i18n="assistantsLabel">Assistants:</span>
+      <div class="asst-chip active" data-q="property" onclick="quickAsk(getChipQuery('property'), this)" data-i18n="chip_property">🏠 Property</div>
+      <div class="asst-chip" data-q="visit" onclick="quickAsk(getChipQuery('visit'), this)" data-i18n="chip_visit">📅 Visits</div>
+      <div class="asst-chip" data-q="liked" onclick="quickAsk(getChipQuery('liked'), this)" data-i18n="chip_liked">❤️ Saved</div>
+      <div class="asst-chip" data-q="message" onclick="quickAsk(getChipQuery('message'), this)" data-i18n="chip_message">💬 Messages</div>
+      <div class="asst-chip" data-q="roommate" onclick="quickAsk(getChipQuery('roommate'), this)" data-i18n="chip_roommate">🤝 Roommate</div>
+      <div class="asst-chip" data-q="match" onclick="quickAsk(getChipQuery('match'), this)" data-i18n="chip_match">⚡ Match</div>
+      <div class="asst-chip" data-q="ad" onclick="openAdModal()" data-i18n="chip_ad">📢 Advertise</div>
+      <div class="asst-chip" data-q="movein" onclick="quickAsk(getChipQuery('movein'), this)" data-i18n="chip_movein">📦 Move In</div>
+      <div class="asst-chip" data-q="subscription" onclick="quickAsk(getChipQuery('subscription'), this)" data-i18n="chip_subscription">💎 Plan</div>
+      <div class="asst-chip" data-q="compare" onclick="quickAsk(getChipQuery('compare'), this)" data-i18n="chip_compare">⚖️ Compare</div>
+    </div>
+
+    <div class="chat-body" id="chatBody"></div>
+
+    <div class="chat-footer">
+      <div class="quick-chips">
+        <div class="q-chip" onclick="sendQuick(getT('quick1'))">🔍 <span data-i18n="quick1">1BHK Chennai</span></div>
+        <div class="q-chip" onclick="sendQuick(getT('quick2'))">📅 <span data-i18n="quick2">My Visits</span></div>
+        <div class="q-chip" onclick="sendQuick(getT('quick3'))">❤️ <span data-i18n="quick3">Saved</span></div>
+        <div class="q-chip" onclick="sendQuick(getT('quick4'))">🤝 <span data-i18n="quick4">Roommates</span></div>
+        <div class="q-chip" onclick="sendQuick(getT('quick5'))">⚖️ <span data-i18n="quick5">Compare</span></div>
+      </div>
+      <div class="input-row">
+        <input class="msg-input" type="text" id="textInput" data-i18n-placeholder="inputPlaceholder" placeholder="Ask about properties, visits, roommates..." onkeydown="if(event.key==='Enter') sendText()"/>
+        <button class="icon-btn btn-mic" id="micBtn" onclick="startVoice()" title="Voice Input">🎤</button>
+        <button class="icon-btn btn-send" onclick="sendText()" title="Send">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   ✅ FIX: Dynamic API base URL — works on any machine / laptop
+   Instead of hardcoding http://127.0.0.1:5000, we use the same
+   host/port the browser is already talking to (Flask serves this HTML).
+================================================================ */
+const API = window.location.origin;
+
+/* ================================================================
+   I18N
+================================================================ */
+const TRANSLATIONS = {
+  en: {
+    heroHeadline:'Find Your', heroHeadlineSpan:'Perfect Home', heroHeadlineWith:'with AI',
+    heroSub:"RentIT's AI assistant speaks your language, understands your needs, and finds you the right property — instantly.",
+    pill1:'🗣 Voice Enabled', pill2:'🌐 Multilingual', pill3:'🤖 AI Powered', pill4:'🏙 10 Assistants',
+    stat1:'Properties', stat2:'Languages', stat3:'AI Support',
+    formTitle:'Get Started', formSub:'Enter your details to open your AI assistant',
+    labelName:'Full Name', labelMobile:'Mobile Number', labelCity:'Your City',
+    loginBtn:'Open RentIT Assistant →', formNote:"Already registered? We'll log you in automatically.",
+    aiOnline:'AI Assistant Online', signOut:'Sign Out',
+    assistantsLabel:'Assistants:',
+    chip_property:'🏠 Property', chip_visit:'📅 Visits', chip_liked:'❤️ Saved',
+    chip_message:'💬 Messages', chip_roommate:'🤝 Roommate', chip_match:'⚡ Match',
+    chip_ad:'📢 Advertise', chip_movein:'📦 Move In', chip_subscription:'💎 Plan', chip_compare:'⚖️ Compare',
+    quick1:'1BHK Chennai', quick2:'My Visits', quick3:'Saved', quick4:'Roommates', quick5:'Compare',
+    inputPlaceholder:'Ask about properties, visits, roommates...',
+    welcome:'Welcome back!', welcomeGreeting:'Hello',
+    q_property:'1BHK available in Chennai?', q_visit:'Show my upcoming visits',
+    q_liked:'Show my saved properties', q_message:'Show my messages to owner',
+    q_roommate:'Show my roommate preferences', q_match:'Find compatible roommates for me',
+    q_movein:'Give me move-in tips', q_subscription:'Check my subscription plan',
+    q_compare:'Compare my saved properties',
+    adModalTitle:'📢 Generate Advertisement', adModalSub:'Upload property image & generate a professional ad + owner draft message',
+    uploadClick:'Click to upload', uploadDrag:'or drag & drop', uploadFormats:'JPG, PNG, WEBP supported',
+    propNameLabel:'Property Name', propTypeLabel:'Property Type', propCityLabel:'City & Locality',
+    propRentLabel:'Monthly Rent (₹)', propHighlightsLabel:'Key Highlights', ownerContactLabel:'Owner Contact',
+    generateAdBtn:'Generate Advertisement', adResultLabel:'📋 Generated Advertisement',
+    copyAdBtn:'Copy Ad', draftLabel:'💬 Draft Message to Owner', copyDraftBtn:'Copy Draft Message',
+  },
+  ta: {
+    heroHeadline:'உங்கள்', heroHeadlineSpan:'சரியான வீடு', heroHeadlineWith:'AI உடன் கண்டறியுங்கள்',
+    heroSub:'RentIT AI உதவியாளர் உங்கள் மொழியில் பேசுகிறது, உங்கள் தேவைகளை புரிந்துகொண்டு சரியான இல்லத்தை உடனடியாக கண்டுபிடிக்கும்.',
+    pill1:'🗣 குரல் இயக்கம்', pill2:'🌐 பல மொழிகள்', pill3:'🤖 AI இயக்கம்', pill4:'🏙 10 உதவியாளர்கள்',
+    stat1:'இல்லங்கள்', stat2:'மொழிகள்', stat3:'AI ஆதரவு',
+    formTitle:'தொடங்குங்கள்', formSub:'உங்கள் AI உதவியாளரை திறக்க விவரங்களை உள்ளிடுங்கள்',
+    labelName:'முழு பெயர்', labelMobile:'மொபைல் எண்', labelCity:'உங்கள் நகரம்',
+    loginBtn:'RentIT உதவியாளரை திறக்க →', formNote:'ஏற்கனவே பதிவு செய்தவரா? நாங்கள் உங்களை உள்நுழைவு செய்வோம்.',
+    aiOnline:'AI உதவியாளர் இணைந்துள்ளது', signOut:'வெளியேறு',
+    assistantsLabel:'உதவியாளர்கள்:',
+    chip_property:'🏠 இல்லம்', chip_visit:'📅 வருகைகள்', chip_liked:'❤️ சேமிப்பு',
+    chip_message:'💬 செய்திகள்', chip_roommate:'🤝 அறை நண்பர்', chip_match:'⚡ பொருத்தம்',
+    chip_ad:'📢 விளம்பரம்', chip_movein:'📦 குடிமாற்றம்', chip_subscription:'💎 திட்டம்', chip_compare:'⚖️ ஒப்பிடு',
+    quick1:'Chennai 1BHK', quick2:'என் வருகைகள்', quick3:'சேமித்தவை', quick4:'அறை நண்பர்கள்', quick5:'ஒப்பிடு',
+    inputPlaceholder:'இல்லம், வருகை, அறை நண்பர் பற்றி கேளுங்கள்...',
+    welcome:'மீண்டும் வரவேற்கிறோம்!', welcomeGreeting:'வணக்கம்',
+    q_property:'Chennai-ல் 1BHK கிடைக்குமா?', q_visit:'என் வரவிருக்கும் வருகைகளை காட்டு',
+    q_liked:'என் சேமித்த இல்லங்களை காட்டு', q_message:'உரிமையாளருக்கு என் செய்திகளை காட்டு',
+    q_roommate:'என் அறை நண்பர் விருப்பங்களை காட்டு', q_match:'என்னுடன் பொருந்தும் அறை நண்பர்களை கண்டறி',
+    q_movein:'குடிமாற்ற குறிப்புகள் தாருங்கள்', q_subscription:'என் திட்டத்தை சரிபார்',
+    q_compare:'என் சேமித்த இல்லங்களை ஒப்பிடு',
+    adModalTitle:'📢 விளம்பரம் உருவாக்கு', adModalSub:'இல்ல படம் பதிவேற்றி தொழில்முறை விளம்பரம் + உரிமையாளர் செய்தி உருவாக்குங்கள்',
+    uploadClick:'பதிவேற்ற கிளிக் செய்யுங்கள்', uploadDrag:'அல்லது இழுத்து விடுங்கள்', uploadFormats:'JPG, PNG, WEBP ஆதரிக்கப்படுகிறது',
+    propNameLabel:'இல்ல பெயர்', propTypeLabel:'இல்ல வகை', propCityLabel:'நகரம் & பகுதி',
+    propRentLabel:'மாத வாடகை (₹)', propHighlightsLabel:'முக்கிய அம்சங்கள்', ownerContactLabel:'உரிமையாளர் தொடர்பு',
+    generateAdBtn:'விளம்பரம் உருவாக்கு', adResultLabel:'📋 உருவாக்கப்பட்ட விளம்பரம்',
+    copyAdBtn:'விளம்பரத்தை நகலெடு', draftLabel:'💬 உரிமையாளருக்கு வரைவு செய்தி', copyDraftBtn:'வரைவு செய்தியை நகலெடு',
+  },
+  hi: {
+    heroHeadline:'अपना', heroHeadlineSpan:'सही घर', heroHeadlineWith:'AI के साथ खोजें',
+    heroSub:'RentIT का AI असिस्टेंट आपकी भाषा में बोलता है, आपकी जरूरत समझता है और तुरंत सही प्रॉपर्टी ढूंढता है।',
+    pill1:'🗣 वॉयस सक्षम', pill2:'🌐 बहुभाषी', pill3:'🤖 AI संचालित', pill4:'🏙 10 असिस्टेंट',
+    stat1:'प्रॉपर्टीज', stat2:'भाषाएं', stat3:'AI सपोर्ट',
+    formTitle:'शुरू करें', formSub:'अपना AI असिस्टेंट खोलने के लिए जानकारी दर्ज करें',
+    labelName:'पूरा नाम', labelMobile:'मोबाइल नंबर', labelCity:'आपका शहर',
+    loginBtn:'RentIT असिस्टेंट खोलें →', formNote:'पहले से रजिस्टर्ड? हम आपको अपने आप लॉगिन करेंगे।',
+    aiOnline:'AI असिस्टेंट ऑनलाइन', signOut:'साइन आउट',
+    assistantsLabel:'असिस्टेंट:',
+    chip_property:'🏠 घर', chip_visit:'📅 विज़िट', chip_liked:'❤️ सेव',
+    chip_message:'💬 मैसेज', chip_roommate:'🤝 रूममेट', chip_match:'⚡ मैच',
+    chip_ad:'📢 विज्ञापन', chip_movein:'📦 शिफ्टिंग', chip_subscription:'💎 प्लान', chip_compare:'⚖️ तुलना',
+    quick1:'Chennai 1BHK', quick2:'मेरी विज़िट', quick3:'सेव किए', quick4:'रूममेट', quick5:'तुलना करें',
+    inputPlaceholder:'घर, विज़िट, रूममेट के बारे में पूछें...',
+    welcome:'वापस आए! स्वागत है!', welcomeGreeting:'नमस्ते',
+    q_property:'Chennai में 1BHK उपलब्ध है?', q_visit:'मेरी आगामी विज़िट दिखाएं',
+    q_liked:'मेरी सेव की गई प्रॉपर्टी दिखाएं', q_message:'मालिक को मेरे मैसेज दिखाएं',
+    q_roommate:'मेरी रूममेट प्राथमिकताएं दिखाएं', q_match:'मेरे लिए अनुकूल रूममेट खोजें',
+    q_movein:'शिफ्टिंग के टिप्स दें', q_subscription:'मेरा सब्सक्रिप्शन चेक करें',
+    q_compare:'मेरी सेव प्रॉपर्टी तुलना करें',
+    adModalTitle:'📢 विज्ञापन बनाएं', adModalSub:'प्रॉपर्टी फोटो अपलोड करके प्रोफेशनल विज्ञापन + मालिक को ड्राफ्ट मैसेज बनाएं',
+    uploadClick:'अपलोड करने के लिए क्लिक करें', uploadDrag:'या खींचकर छोड़ें', uploadFormats:'JPG, PNG, WEBP समर्थित',
+    propNameLabel:'प्रॉपर्टी नाम', propTypeLabel:'प्रॉपर्टी प्रकार', propCityLabel:'शहर और इलाका',
+    propRentLabel:'मासिक किराया (₹)', propHighlightsLabel:'मुख्य विशेषताएं', ownerContactLabel:'मालिक संपर्क',
+    generateAdBtn:'विज्ञापन बनाएं', adResultLabel:'📋 बना विज्ञापन',
+    copyAdBtn:'विज्ञापन कॉपी करें', draftLabel:'💬 मालिक को ड्राफ्ट मैसेज', copyDraftBtn:'ड्राफ्ट मैसेज कॉपी करें',
+  },
+  te: {
+    heroHeadline:'మీ', heroHeadlineSpan:'సరైన ఇల్లు', heroHeadlineWith:'AI తో కనుగొనండి',
+    heroSub:'RentIT AI అసిస్టెంట్ మీ భాషలో మాట్లాడుతుంది, అవసరాలు అర్థం చేసుకుని వెంటనే సరైన ఇల్లు కనుగొంటుంది.',
+    pill1:'🗣 వాయిస్ ఎనేబుల్', pill2:'🌐 బహుభాష', pill3:'🤖 AI ఆధారిత', pill4:'🏙 10 అసిస్టెంట్లు',
+    stat1:'ఇళ్ళు', stat2:'భాషలు', stat3:'AI మద్దతు',
+    formTitle:'ప్రారంభించండి', formSub:'AI అసిస్టెంట్ తెరవడానికి వివరాలు నమోదు చేయండి',
+    labelName:'పూర్తి పేరు', labelMobile:'మొబైల్ నంబర్', labelCity:'మీ నగరం',
+    loginBtn:'RentIT అసిస్టెంట్ తెరవండి →', formNote:'ఇప్పటికే నమోదయ్యారా? మేము మిమ్మల్ని స్వయంచాలకంగా లాగిన్ చేస్తాము.',
+    aiOnline:'AI అసిస్టెంట్ ఆన్లైన్', signOut:'సైన్ అవుట్',
+    assistantsLabel:'అసిస్టెంట్లు:',
+    chip_property:'🏠 ఇల్లు', chip_visit:'📅 సందర్శనలు', chip_liked:'❤️ సేవ్',
+    chip_message:'💬 సందేశాలు', chip_roommate:'🤝 రూమ్‌మేట్', chip_match:'⚡ మ్యాచ్',
+    chip_ad:'📢 ప్రకటన', chip_movein:'📦 మారడం', chip_subscription:'💎 ప్లాన్', chip_compare:'⚖️ పోల్చండి',
+    quick1:'Chennai 1BHK', quick2:'నా సందర్శనలు', quick3:'సేవ్ చేసినవి', quick4:'రూమ్‌మేట్లు', quick5:'పోల్చండి',
+    inputPlaceholder:'ఇళ్ళు, సందర్శనలు, రూమ్‌మేట్ గురించి అడగండి...',
+    welcome:'తిరిగి స్వాగతం!', welcomeGreeting:'నమస్కారం',
+    q_property:'Chennai లో 1BHK అందుబాటులో ఉందా?', q_visit:'నా రాబోయే సందర్శనలు చూపించు',
+    q_liked:'నా సేవ్ చేసిన ఇళ్ళు చూపించు', q_message:'యజమానికి నా సందేశాలు చూపించు',
+    q_roommate:'నా రూమ్‌మేట్ ప్రాధాన్యతలు చూపించు', q_match:'నాకు అనువైన రూమ్‌మేట్లు కనుగొనండి',
+    q_movein:'మారే చిట్కాలు ఇవ్వండి', q_subscription:'నా సదస్యత తనిఖీ చేయండి',
+    q_compare:'నా సేవ్ ఇళ్ళు పోల్చండి',
+    adModalTitle:'📢 ప్రకటన రూపొందించండి', adModalSub:'ఆస్తి చిత్రం అప్‌లోడ్ చేసి ప్రొఫెషనల్ ప్రకటన + యజమానికి సందేశం రూపొందించండి',
+    uploadClick:'అప్‌లోడ్ చేయడానికి క్లిక్ చేయండి', uploadDrag:'లేదా లాగి వదలండి', uploadFormats:'JPG, PNG, WEBP మద్దతు',
+    propNameLabel:'ఆస్తి పేరు', propTypeLabel:'ఆస్తి రకం', propCityLabel:'నగరం & ప్రాంతం',
+    propRentLabel:'నెలవారీ అద్దె (₹)', propHighlightsLabel:'ముఖ్య విశేషాలు', ownerContactLabel:'యజమాని సంప్రదింపు',
+    generateAdBtn:'ప్రకటన రూపొందించు', adResultLabel:'📋 రూపొందించిన ప్రకటన',
+    copyAdBtn:'ప్రకటన కాపీ', draftLabel:'💬 యజమానికి సందేశ ముసాయిదా', copyDraftBtn:'ముసాయిదా కాపీ',
+  },
+  kn: {
+    heroHeadline:'ನಿಮ್ಮ', heroHeadlineSpan:'ಸರಿಯಾದ ಮನೆ', heroHeadlineWith:'AI ಜೊತೆ ಹುಡುಕಿ',
+    heroSub:'RentIT AI ಸಹಾಯಕ ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಮಾತನಾಡುತ್ತದೆ, ನಿಮ್ಮ ಅಗತ್ಯಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಂಡು ತಕ್ಷಣ ಸರಿಯಾದ ಆಸ್ತಿ ಕಂಡುಹಿಡಿಯುತ್ತದೆ.',
+    pill1:'🗣 ಧ್ವನಿ ಸಕ್ರಿಯ', pill2:'🌐 ಬಹುಭಾಷೆ', pill3:'🤖 AI ಚಾಲಿತ', pill4:'🏙 10 ಸಹಾಯಕರು',
+    stat1:'ಮನೆಗಳು', stat2:'ಭಾಷೆಗಳು', stat3:'AI ಬೆಂಬಲ',
+    formTitle:'ಪ್ರಾರಂಭಿಸಿ', formSub:'AI ಸಹಾಯಕ ತೆರೆಯಲು ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ',
+    labelName:'ಪೂರ್ಣ ಹೆಸರು', labelMobile:'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ', labelCity:'ನಿಮ್ಮ ನಗರ',
+    loginBtn:'RentIT ಸಹಾಯಕ ತೆರೆಯಿರಿ →', formNote:'ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಿದ್ದೀರಾ? ನಾವು ನಿಮ್ಮನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಲಾಗಿನ್ ಮಾಡುತ್ತೇವೆ.',
+    aiOnline:'AI ಸಹಾಯಕ ಆನ್‌ಲೈನ್', signOut:'ಸೈನ್ ಔಟ್',
+    assistantsLabel:'ಸಹಾಯಕರು:',
+    chip_property:'🏠 ಮನೆ', chip_visit:'📅 ಭೇಟಿಗಳು', chip_liked:'❤️ ಉಳಿಸಿದ',
+    chip_message:'💬 ಸಂದೇಶಗಳು', chip_roommate:'🤝 ರೂಮ್‌ಮೇಟ್', chip_match:'⚡ ಹೊಂದಾಣಿಕೆ',
+    chip_ad:'📢 ಜಾಹೀರಾತು', chip_movein:'📦 ಸ್ಥಳಾಂತರ', chip_subscription:'💎 ಯೋಜನೆ', chip_compare:'⚖️ ಹೋಲಿಕೆ',
+    quick1:'Chennai 1BHK', quick2:'ನನ್ನ ಭೇಟಿಗಳು', quick3:'ಉಳಿಸಿದ', quick4:'ರೂಮ್‌ಮೇಟ್', quick5:'ಹೋಲಿಸಿ',
+    inputPlaceholder:'ಮನೆ, ಭೇಟಿ, ರೂಮ್‌ಮೇಟ್ ಬಗ್ಗೆ ಕೇಳಿ...',
+    welcome:'ಮರಳಿ ಸ್ವಾಗತ!', welcomeGreeting:'ನಮಸ್ಕಾರ',
+    q_property:'Chennai ನಲ್ಲಿ 1BHK ಲಭ್ಯವಿದೆಯೇ?', q_visit:'ನನ್ನ ಮುಂಬರುವ ಭೇಟಿಗಳನ್ನು ತೋರಿಸಿ',
+    q_liked:'ನನ್ನ ಉಳಿಸಿದ ಮನೆಗಳನ್ನು ತೋರಿಸಿ', q_message:'ಮಾಲೀಕರಿಗೆ ನನ್ನ ಸಂದೇಶಗಳನ್ನು ತೋರಿಸಿ',
+    q_roommate:'ನನ್ನ ರೂಮ್‌ಮೇಟ್ ಆದ್ಯತೆಗಳನ್ನು ತೋರಿಸಿ', q_match:'ನನಗೆ ಸೂಕ್ತ ರೂಮ್‌ಮೇಟ್ಗಳನ್ನು ಹುಡುಕಿ',
+    q_movein:'ಸ್ಥಳಾಂತರ ಸಲಹೆಗಳನ್ನು ನೀಡಿ', q_subscription:'ನನ್ನ ಚಂದಾದಾರಿಕೆ ಪರಿಶೀಲಿಸಿ',
+    q_compare:'ನನ್ನ ಉಳಿಸಿದ ಮನೆಗಳನ್ನು ಹೋಲಿಸಿ',
+    adModalTitle:'📢 ಜಾಹೀರಾತು ರಚಿಸಿ', adModalSub:'ಆಸ್ತಿ ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ವೃತ್ತಿಪರ ಜಾಹೀರಾತು + ಮಾಲೀಕರ ಸಂದೇಶ ರಚಿಸಿ',
+    uploadClick:'ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ಕ್ಲಿಕ್ ಮಾಡಿ', uploadDrag:'ಅಥವಾ ಎಳೆದು ಬಿಡಿ', uploadFormats:'JPG, PNG, WEBP ಬೆಂಬಲಿತ',
+    propNameLabel:'ಆಸ್ತಿ ಹೆಸರು', propTypeLabel:'ಆಸ್ತಿ ವಿಧ', propCityLabel:'ನಗರ & ಪ್ರದೇಶ',
+    propRentLabel:'ಮಾಸಿಕ ಬಾಡಿಗೆ (₹)', propHighlightsLabel:'ಪ್ರಮುಖ ವೈಶಿಷ್ಟ್ಯಗಳು', ownerContactLabel:'ಮಾಲೀಕರ ಸಂಪರ್ಕ',
+    generateAdBtn:'ಜಾಹೀರಾತು ರಚಿಸಿ', adResultLabel:'📋 ರಚಿಸಿದ ಜಾಹೀರಾತು',
+    copyAdBtn:'ಜಾಹೀರಾತು ನಕಲಿಸಿ', draftLabel:'💬 ಮಾಲೀಕರಿಗೆ ಕರಡು ಸಂದೇಶ', copyDraftBtn:'ಕರಡು ನಕಲಿಸಿ',
+  }
+};
+
+let currentLang = 'en';
+
+function getT(key){ return (TRANSLATIONS[currentLang]||TRANSLATIONS.en)[key] || TRANSLATIONS.en[key] || key; }
+
+function setPageLang(lang){
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent.trim()===({en:'EN',ta:'தமிழ்',hi:'हिंदी',te:'తెలుగు',kn:'ಕನ್ನಡ'}[lang]));
+  });
+  applyTranslations();
+  showToast('🌐 ' + ({en:'English',ta:'தமிழ்',hi:'हिंदी',te:'తెలుగు',kn:'ಕನ್ನಡ'}[lang]));
+}
+
+function applyTranslations(){
+  const t = TRANSLATIONS[currentLang]||TRANSLATIONS.en;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-placeholder');
+    if(t[key]) el.placeholder = t[key];
+  });
+}
+
+/* ================================================================
+   GENERAL KB
+================================================================ */
+const GENERAL_KB = {
+  'pg items':['Bed frame & mattress 🛏️','Wardrobe & dresser 🛍️','Study table & chair 📚','Pillow, bedsheet & blanket','Bucket & mug 🪣','Hangers & cloth rack','Basic kitchen items — plate, cup, spoon','Extension board & USB hub 🔌'],
+  'move in checklist':['Deep clean before moving 🧹','Set up electricity & water 💡','Check internet & gas 📶','Inspect locks & safety 🔒','Meet neighbours & building manager 👋'],
+  '1bhk items':['Bed frame & mattress 🛏️','Sofa / seating 🛋️','Dining table & chairs','Fridge & microwave 🍔','TV & cable connection 📺','Washing machine','Wardrobe & dresser 🛍️','Study table & chair 📚'],
+  '2bhk items':['Everything in 1BHK','Extra bed & wardrobe for 2nd room','Split AC for both rooms','Larger fridge & 2 burner stove'],
+  'villa items':['All furniture sets','Security camera & gate','Garden tools 🌿','Parking essentials','Generator / inverter backup'],
+  'furnished':['Fully furnished means bed, wardrobe, sofa, dining table, fridge, washing machine, TV all included — you just bring clothes!'],
+  'what to buy':['Bed frame & mattress 🛏️','Wardrobe 🛍️','Study table 📚','Bucket & mug 🪣','Pillow & bedsheet','Kitchen utensils','Extension board 🔌'],
+};
+
+function checkGeneralKB(msg){
+  const q = msg.toLowerCase();
+  if(q.includes('pg') && (q.includes('buy') || q.includes('need') || q.includes('item') || q.includes('what') || q.includes('list'))) return 'pg items';
+  if(q.includes('move in') || q.includes('checklist') || q.includes('shifting')) return 'move in checklist';
+  if(q.includes('1bhk') && (q.includes('buy') || q.includes('item') || q.includes('need'))) return '1bhk items';
+  if(q.includes('2bhk') && (q.includes('buy') || q.includes('item') || q.includes('need'))) return '2bhk items';
+  if(q.includes('villa') && (q.includes('buy') || q.includes('item') || q.includes('need'))) return 'villa items';
+  if(q.includes('furnished')) return 'furnished';
+  if((q.includes('what') || q.includes('which')) && (q.includes('buy') || q.includes('need') || q.includes('bring'))) return 'what to buy';
+  return null;
+}
+
+function buildGeneralAnswer(kbKey){
+  const items = GENERAL_KB[kbKey];
+  if(!items) return null;
+  const langIntros = { en:'Here\'s what you need:', ta:'நீங்கள் தேவையானவை:', hi:'आपको यह चाहिए:', te:'మీకు ఇవి కావాలి:', kn:'ನಿಮಗೆ ಇವು ಬೇಕು:' };
+  return (langIntros[currentLang]||langIntros.en) + '\n\n• ' + items.join('\n• ');
+}
+
+/* ================================================================
+   STATE
+================================================================ */
+let currentUserId = null;
+let isRecording    = false;
+let currentAudio   = null;
+let adImageBase64  = null;
+
+/* ================================================================
+   TOAST
+================================================================ */
+function showToast(msg, duration=2500){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), duration);
+}
+
+/* ================================================================
+   PAGE SWITCH
+================================================================ */
+function showChat(){ document.getElementById('loginPage').classList.add('hidden'); document.getElementById('chatPage').classList.remove('hidden'); }
+function showLogin(){ document.getElementById('chatPage').classList.add('hidden'); document.getElementById('loginPage').classList.remove('hidden'); }
+
+/* ================================================================
+   AUTO LOGIN  — uses dynamic API
+================================================================ */
+window.onload = async () => {
+  applyTranslations();
+  const savedId = sessionStorage.getItem('userId');
+  if(!savedId){ showLogin(); return; }
+  try{
+    const res  = await fetch(`${API}/check-user/${savedId}`);
+    const data = await res.json();
+    if(data.exists){
+      currentUserId = savedId;
+      showChat();
+      renderWelcome();
+    } else {
+      sessionStorage.removeItem('userId');
+      showLogin();
+    }
+  } catch(e){ showLogin(); }
+};
+
+/* ================================================================
+   REGISTER / LOGIN  — uses dynamic API
+================================================================ */
+async function registerUser(){
+  const name   = document.getElementById('name').value.trim();
+  const mobile = document.getElementById('mobile').value.trim();
+  const city   = document.getElementById('city').value.trim();
+  if(!name || !mobile || !city){ showToast('⚠️ Please fill all fields'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = '...';
+  try{
+    const res  = await fetch(`${API}/register`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name, mobile, city})
+    });
+    const data = await res.json();
+    currentUserId = data.userId;
+    sessionStorage.setItem('userId', data.userId);
+    showToast('✅ Welcome to RentIT!');
+    showChat();
+    renderWelcome(name);
+  } catch(e){
+    showToast('❌ Server error. Please try again.');
+    btn.disabled = false;
+    btn.textContent = getT('loginBtn');
+  }
+}
+
+/* ================================================================
+   LOGOUT
+================================================================ */
+function logoutUser(){
+  sessionStorage.removeItem('userId');
+  currentUserId = null;
+  document.getElementById('chatBody').innerHTML = '';
+  showLogin();
+  showToast('👋 Signed out successfully');
+}
+
+/* ================================================================
+   WELCOME CARD
+================================================================ */
+function renderWelcome(name=''){
+  const body = document.getElementById('chatBody');
+  body.innerHTML = '';
+  const greeting = name ? `${getT('welcomeGreeting')}, ${name.split(' ')[0]}! 👋` : `${getT('welcome')} 👋`;
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  row.innerHTML = `
+    <div class="msg-avatar">🏠</div>
+    <div>
+      <div class="welcome-card">
+        <h3>${greeting} I'm <span>RentIT</span></h3>
+        <div class="capability-grid">
+          <div class="cap-item"><span>🔍</span>${getT('chip_property')}</div>
+          <div class="cap-item"><span>📅</span>${getT('chip_visit')}</div>
+          <div class="cap-item"><span>❤️</span>${getT('chip_liked')}</div>
+          <div class="cap-item"><span>🤝</span>${getT('chip_roommate')}</div>
+          <div class="cap-item"><span>💬</span>${getT('chip_message')}</div>
+          <div class="cap-item"><span>⚖️</span>${getT('chip_compare')}</div>
+          <div class="cap-item"><span>📢</span>${getT('chip_ad')}</div>
+          <div class="cap-item"><span>💎</span>${getT('chip_subscription')}</div>
+        </div>
+      </div>
+      <div class="bubble-meta">${getTime()}</div>
+    </div>`;
+  body.appendChild(row);
+  scrollBottom();
+}
+
+/* ================================================================
+   CHIP QUERY HELPER
+================================================================ */
+function getChipQuery(type){ return getT('q_' + type); }
+
+/* ================================================================
+   MESSAGES
+================================================================ */
+function appendUser(text){
+  const body = document.getElementById('chatBody');
+  const row  = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `
+    <div class="msg-avatar">👤</div>
+    <div>
+      <div class="bubble">${escHtml(text)}</div>
+      <div class="bubble-meta">${getTime()}</div>
+    </div>`;
+  body.appendChild(row);
+  scrollBottom();
+}
+
+function appendBot(text, audioUrl=null, assistantType=''){
+  const body = document.getElementById('chatBody');
+  const typingRow = document.getElementById('typingRow');
+  if(typingRow) typingRow.remove();
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  let audioHtml = audioUrl ? `<div class="audio-btn" onclick="playAudio('${audioUrl}')">🔊 Play Voice Reply</div>` : '';
+  let tagHtml   = assistantType ? `<span class="assistant-tag">${assistantLabel(assistantType)}</span>` : '';
+  row.innerHTML = `
+    <div class="msg-avatar">🏠</div>
+    <div>
+      <div class="bubble">${escHtml(text)}${audioHtml}</div>
+      <div class="bubble-meta">${tagHtml} ${getTime()}</div>
+    </div>`;
+  body.appendChild(row);
+  scrollBottom();
+}
+
+function showTyping(){
+  const body = document.getElementById('chatBody');
+  const row  = document.createElement('div');
+  row.className = 'msg-row bot';
+  row.id = 'typingRow';
+  row.innerHTML = `
+    <div class="msg-avatar">🏠</div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+    </div>`;
+  body.appendChild(row);
+  scrollBottom();
+}
+
+/* ================================================================
+   SEND MESSAGE  — uses dynamic API
+================================================================ */
+async function sendMessage(text){
+  if(!text.trim()) return;
+  appendUser(text);
+
+  const kbKey = checkGeneralKB(text);
+  if(kbKey){
+    const answer = buildGeneralAnswer(kbKey);
+    if(answer){ showTyping(); setTimeout(()=>{ appendBot(answer, null, 'general'); }, 600); return; }
+  }
+
+  showTyping();
+  try{
+    const res  = await fetch(`${API}/voice-reply`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({userId: currentUserId, message: text})
+    });
+    const data = await res.json();
+    if(data.error){ appendBot('⚠️ ' + data.error); return; }
+    // ✅ Audio URL also uses dynamic API
+    const audioUrl = data.audio ? `${API}${data.audio}` : null;
+    appendBot(data.reply, audioUrl, data.assistant);
+    if(audioUrl) playAudio(audioUrl);
+    if(data.assistant) highlightChip(data.assistant);
+  } catch(e){
+    const typingRow = document.getElementById('typingRow');
+    if(typingRow) typingRow.remove();
+    appendBot('⚠️ Could not reach server. Please check your connection.');
+  }
+}
+
+function sendText(){
+  const inp = document.getElementById('textInput');
+  const txt = inp.value.trim();
+  if(!txt) return;
+  inp.value = '';
+  sendMessage(txt);
+}
+
+function sendQuick(text){ sendMessage(text); }
+
+function quickAsk(text, el){
+  document.querySelectorAll('.asst-chip').forEach(c => c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  sendMessage(text);
+}
+
+/* ================================================================
+   VOICE INPUT
+================================================================ */
+function startVoice(){
+  const micBtn = document.getElementById('micBtn');
+  const lang   = document.getElementById('langSelect').value;
+  if(isRecording){ return; }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){ showToast('❌ Voice not supported in this browser'); return; }
+  const recognition = new SpeechRecognition();
+  recognition.lang = lang;
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onstart = () => { isRecording=true; micBtn.classList.add('recording'); micBtn.textContent='⏹'; showToast('🎤 Listening...'); };
+  recognition.onresult = e => { const text = e.results[0][0].transcript; document.getElementById('textInput').value = text; sendMessage(text); };
+  recognition.onerror = e => { showToast('❌ Voice error: ' + e.error); };
+  recognition.onend = () => { isRecording=false; micBtn.classList.remove('recording'); micBtn.textContent='🎤'; };
+  recognition.start();
+}
+
+/* ================================================================
+   AUDIO PLAYBACK
+================================================================ */
+function playAudio(url){
+  if(currentAudio){ currentAudio.pause(); currentAudio=null; }
+  currentAudio = new Audio(url);
+  currentAudio.play().catch(()=>{});
+}
+
+/* ================================================================
+   CHIP HIGHLIGHT
+================================================================ */
+function highlightChip(type){
+  document.querySelectorAll('.asst-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.q === type);
+  });
+}
+
+/* ================================================================
+   AD MODAL
+================================================================ */
+function openAdModal(){
+  document.getElementById('adModal').classList.add('show');
+  document.getElementById('adResultBox').classList.remove('show');
+  document.getElementById('draftBox').classList.remove('show');
+  highlightChip('ad');
+}
+function closeAdModal(){ document.getElementById('adModal').classList.remove('show'); }
+
+function handleImageUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const zone    = document.getElementById('uploadZone');
+  const preview = document.getElementById('uploadPreview');
+  const reader  = new FileReader();
+  reader.onload = (e) => {
+    adImageBase64 = e.target.result;
+    preview.src   = e.target.result;
+    preview.style.display = 'block';
+    zone.classList.add('has-file');
+  };
+  reader.readAsDataURL(file);
+}
+
+function generateLocalAd(){
+  const propName  = document.getElementById('adPropName').value.trim();
+  const propType  = document.getElementById('adPropType').value.trim();
+  const propCity  = document.getElementById('adPropCity').value.trim();
+  const propRent  = document.getElementById('adPropRent').value.trim();
+  const highlights= document.getElementById('adHighlights').value.trim();
+  const ownerContact = document.getElementById('adOwnerContact').value.trim();
+  if(!propName || !propType || !propCity){ showToast('⚠️ Fill Property Name, Type & City'); return; }
+  const btn = document.getElementById('generateAdBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating...';
+  const resultImg = document.getElementById('adResultImg');
+  if(adImageBase64){ resultImg.src = adImageBase64; resultImg.style.display = 'block'; }
+  else { resultImg.style.display = 'none'; }
+  const rentLine    = propRent ? `💰 Rent: ₹${Number(propRent).toLocaleString('en-IN')}/month` : '';
+  const highLine    = highlights ? `✨ Highlights: ${highlights}` : '';
+  const contactLine = ownerContact ? `📞 Contact Owner: ${ownerContact}` : '';
+  const adTexts = {
+    en:`🏠 ${propType.toUpperCase()} FOR RENT — ${propCity.toUpperCase()}\n\n📍 ${propName}\n🏙️ Location: ${propCity}\n${rentLine}\n${highLine}\n\n🌟 Why Choose Us?\n• Prime location in ${propCity}\n• Well-maintained & clean\n• Ready to move-in\n\n${contactLine}\n\n📲 Message now to schedule your visit!\n#RentIT #RealEstate #${propType.replace(/\s/g,'')} #${propCity.replace(/\s/g,'')}`,
+    ta:`🏠 வாடகைக்கு ${propType} — ${propCity}\n\n📍 ${propName}\n🏙️ இடம்: ${propCity}\n${rentLine}\n${highLine}\n\n🌟 ஏன் தேர்வு செய்யணும்?\n• ${propCity}ல் சிறந்த இடம்\n• நன்கு பராமரிக்கப்பட்டது\n• உடனடியாக குடிமாற தயார்\n\n${contactLine}\n\n📲 இப்போதே message செய்து visit பண்ணுங்கள்!`,
+    hi:`🏠 किराये के लिए ${propType} — ${propCity}\n\n📍 ${propName}\n🏙️ स्थान: ${propCity}\n${rentLine}\n${highLine}\n\n🌟 हमें क्यों चुनें?\n• ${propCity} में बेहतरीन लोकेशन\n• अच्छी तरह रखरखाव\n• तुरंत शिफ्टिंग के लिए तैयार\n\n${contactLine}\n\n📲 अभी मैसेज करें और विजिट शेड्यूल करें!`,
+    te:`🏠 అద్దెకు ${propType} — ${propCity}\n\n📍 ${propName}\n🏙️ స్థానం: ${propCity}\n${rentLine}\n${highLine}\n\n🌟 ఎందుకు ఎంచుకోవాలి?\n• ${propCity}లో ప్రధాన స్థానం\n• చక్కగా నిర్వహించబడింది\n• వెంటనే మారడానికి సిద్ధం\n\n${contactLine}\n\n📲 ఇప్పుడే సందేశం పంపి సందర్శన నిర్ణయించుకోండి!`,
+    kn:`🏠 ಬಾಡಿಗೆಗೆ ${propType} — ${propCity}\n\n📍 ${propName}\n🏙️ ಸ್ಥಳ: ${propCity}\n${rentLine}\n${highLine}\n\n🌟 ನಮ್ಮನ್ನು ಏಕೆ ಆಯ್ಕೆ ಮಾಡಬೇಕು?\n• ${propCity}ದಲ್ಲಿ ಪ್ರಮುಖ ಸ್ಥಳ\n• ಉತ್ತಮ ನಿರ್ವಹಣೆ\n• ತಕ್ಷಣ ಸ್ಥಳಾಂತರಕ್ಕೆ ಸಿದ್ಧ\n\n${contactLine}\n\n📲 ಈಗಲೇ ಸಂದೇಶ ಕಳುಹಿಸಿ ಮತ್ತು ಭೇಟಿ ನಿಗದಿಪಡಿಸಿ!`,
+  };
+  const draftTexts = {
+    en:`Hello,\n\nI came across your listing for "${propName}" (${propType}) in ${propCity} on RentIT.\n\nI am interested in viewing this property. Could you please let me know your availability for a visit?\n\n${ownerContact ? `I will contact you at: ${ownerContact}` : ''}\n\nLooking forward to hearing from you.\n\nThanks,\n[Your Name]`,
+    ta:`வணக்கம்,\n\nRentIT-ல் "${propName}" (${propType}), ${propCity} விளம்பரம் பார்த்தேன்.\n\nஇந்த இல்லத்தை பார்க்க விரும்புகிறேன். தயவுசெய்து உங்கள் நேரம் தெரிவிக்கவும்.\n\n${ownerContact ? `தொடர்பு: ${ownerContact}` : ''}\n\nநன்றி,\n[உங்கள் பெயர்]`,
+    hi:`नमस्ते,\n\nRentIT पर आपकी "${propName}" (${propType}), ${propCity} की लिस्टिंग देखी।\n\nमैं यह प्रॉपर्टी देखना चाहता/चाहती हूं। कृपया अपनी उपलब्धता बताएं।\n\n${ownerContact ? `संपर्क: ${ownerContact}` : ''}\n\nधन्यवाद,\n[आपका नाम]`,
+    te:`నమస్కారం,\n\nRentIT లో మీ "${propName}" (${propType}), ${propCity} లిస్టింగ్ చూశాను.\n\nఈ ఆస్తిని చూడాలనుకుంటున్నాను. దయచేసి మీ అందుబాటు సమయం తెలపండి.\n\n${ownerContact ? `సంప్రదింపు: ${ownerContact}` : ''}\n\nధన్యవాదాలు,\n[మీ పేరు]`,
+    kn:`ನಮಸ್ಕಾರ,\n\nRentIT ನಲ್ಲಿ ನಿಮ್ಮ "${propName}" (${propType}), ${propCity} ಪಟ್ಟಿ ನೋಡಿದೆ.\n\nಈ ಆಸ್ತಿ ನೋಡಲು ಆಸಕ್ತಿ ಇದೆ. ದಯಮಾಡಿ ನಿಮ್ಮ ಲಭ್ಯತೆ ತಿಳಿಸಿ.\n\n${ownerContact ? `ಸಂಪರ್ಕ: ${ownerContact}` : ''}\n\nಧನ್ಯವಾದಗಳು,\n[ನಿಮ್ಮ ಹೆಸರು]`,
+  };
+  setTimeout(()=>{
+    document.getElementById('adResultText').textContent = adTexts[currentLang]||adTexts.en;
+    document.getElementById('adResultBox').classList.add('show');
+    document.getElementById('draftText').textContent = draftTexts[currentLang]||draftTexts.en;
+    document.getElementById('draftBox').classList.add('show');
+    btn.disabled = false;
+    btn.textContent = '✨ ' + getT('generateAdBtn');
+    showToast('✅ Advertisement Generated!');
+  }, 800);
+}
+
+function copyAd(){ navigator.clipboard.writeText(document.getElementById('adResultText').textContent).then(()=> showToast('📋 Ad copied!')).catch(()=> showToast('❌ Copy failed')); }
+function copyDraft(){ navigator.clipboard.writeText(document.getElementById('draftText').textContent).then(()=> showToast('📋 Draft copied!')).catch(()=> showToast('❌ Copy failed')); }
+
+/* ================================================================
+   HELPERS
+================================================================ */
+function scrollBottom(){ const body=document.getElementById('chatBody'); body.scrollTop=body.scrollHeight; }
+function getTime(){ return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function escHtml(str){ return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function assistantLabel(type){
+  const map={ property:'🏠 Property', visit:'📅 Visits', liked:'❤️ Saved', message:'💬 Messages',
+    roommate:'🤝 Roommate', match:'⚡ Match', ad:'📢 Advertise', movein:'📦 Move In',
+    subscription:'💎 Plan', compare:'⚖️ Compare', general:'💡 General' };
+  return map[type]||type;
+}
+
+document.getElementById('adModal').addEventListener('click', function(e){
+  if(e.target === this) closeAdModal();
+});
+</script>
+</body>
+</html>
