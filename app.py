@@ -28,16 +28,16 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route("/")
 def home():
     return render_template("add.html")
 
+
 # =========================================
 # GROQ
 # =========================================
-client = Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # =========================================
 # CLOUDINARY
@@ -45,7 +45,7 @@ client = Groq(
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
     api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
 )
 
 # =========================================
@@ -57,35 +57,34 @@ index = pc.Index("realestate")
 # =========================================
 # EMBEDDING MODEL
 # =========================================
-embed_model = SentenceTransformer(
-     "all-MiniLM-L6-v2"
-)
+embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+
 
 def create_embedding(text):
     return embed_model.encode(text).tolist()
 
+
 # =========================================
 # DATABASE
 # =========================================
-conn = psycopg2.connect(
-    os.getenv("DATABASE_URL")
-)
+conn = psycopg2.connect(os.getenv("DATABASE_URL"))
 
 conn.autocommit = True
 cursor = conn.cursor()
 
 VOICE_LANG_MAP = {
     "ENGLISH": "en",
-    "HINDI":   "hi",
-    "TAMIL":   "ta",
-    "TELUGU":  "te",
-    "KANNADA": "kn"
+    "HINDI": "hi",
+    "TAMIL": "ta",
+    "TELUGU": "te",
+    "KANNADA": "kn",
 }
 
 
 # =========================================
 # 10 ASSISTANT ROUTER  (shared helper)
 # =========================================
+
 
 def detect_assistant_type(msg):
     """
@@ -95,74 +94,163 @@ def detect_assistant_type(msg):
     query = msg.lower()
 
     # 1 PROPERTY SEARCH
-    if any(x in query for x in [
-        "property", "pg", "1bhk", "2bhk", "villa", "rent", "house", "flat",
-        "apartment", "room", "studio", "hostel", "accommodation"
-    ]):
+    if any(
+        x in query
+        for x in [
+            "property",
+            "pg",
+            "1bhk",
+            "2bhk",
+            "villa",
+            "rent",
+            "house",
+            "flat",
+            "apartment",
+            "room",
+            "studio",
+            "hostel",
+            "accommodation",
+        ]
+    ):
         return "property"
 
     # 2 VISIT ASSISTANT
-    elif any(x in query for x in [
-        "visit", "visits", "visited", "booked visit", "scheduled visit",
-        "my visits", "visit history", "confirmed visit",
-        "cancel visit", "next visit", "upcoming visit"
-    ]):
+    elif any(
+        x in query
+        for x in [
+            "visit",
+            "visits",
+            "visited",
+            "booked visit",
+            "scheduled visit",
+            "my visits",
+            "visit history",
+            "confirmed visit",
+            "cancel visit",
+            "next visit",
+            "upcoming visit",
+        ]
+    ):
         return "visit"
 
     # 3 LIKED / SAVED PROPERTIES
-    elif any(x in query for x in [
-        "liked", "saved", "favorites", "favourite", "wishlist",
-        "shortlisted", "bookmarked"
-    ]):
+    elif any(
+        x in query
+        for x in [
+            "liked",
+            "saved",
+            "favorites",
+            "favourite",
+            "wishlist",
+            "shortlisted",
+            "bookmarked",
+        ]
+    ):
         return "liked"
 
     # 4 MESSAGE OWNER
-    elif any(x in query for x in [
-        "message", "owner", "contact owner", "msg", "inbox",
-        "sent message", "received message"
-    ]):
+    elif any(
+        x in query
+        for x in [
+            "message",
+            "owner",
+            "contact owner",
+            "msg",
+            "inbox",
+            "sent message",
+            "received message",
+        ]
+    ):
         return "message"
 
     # 5 ROOMMATE ASSISTANT
-    elif any(x in query for x in [
-        "roommate", "sharing", "shared room", "co-tenant",
-        "flatmate", "room sharing"
-    ]):
+    elif any(
+        x in query
+        for x in [
+            "roommate",
+            "sharing",
+            "shared room",
+            "co-tenant",
+            "flatmate",
+            "room sharing",
+        ]
+    ):
         return "roommate"
 
     # 6 MATCH / COMPATIBILITY ASSISTANT
-    elif any(x in query for x in [
-        "match", "compatible", "compatibility", "best match",
-        "find roommate", "who matches"
-    ]):
+    elif any(
+        x in query
+        for x in [
+            "match",
+            "compatible",
+            "compatibility",
+            "best match",
+            "find roommate",
+            "who matches",
+        ]
+    ):
         return "match"
 
     # 7 ADVERTISEMENT ASSISTANT
-    elif any(x in query for x in [
-        "advertisement", "ad", "promote", "listing", "post property",
-        "advertise", "generate ad"
-    ]):
+    elif any(
+        x in query
+        for x in [
+            "advertisement",
+            "ad",
+            "promote",
+            "listing",
+            "post property",
+            "advertise",
+            "generate ad",
+        ]
+    ):
         return "ad"
 
     # 8 MOVE-IN ASSISTANT
-    elif any(x in query for x in [
-        "move", "shift", "move in", "moving", "shifting", "checklist",
-        "move-in", "relocation"
-    ]):
+    elif any(
+        x in query
+        for x in [
+            "move",
+            "shift",
+            "move in",
+            "moving",
+            "shifting",
+            "checklist",
+            "move-in",
+            "relocation",
+        ]
+    ):
         return "movein"
 
     # 9 SUBSCRIPTION ASSISTANT
-    elif any(x in query for x in [
-        "subscription", "plan", "upgrade", "premium", "pricing",
-        "subscribe", "my plan", "renew"
-    ]):
+    elif any(
+        x in query
+        for x in [
+            "subscription",
+            "plan",
+            "upgrade",
+            "premium",
+            "pricing",
+            "subscribe",
+            "my plan",
+            "renew",
+        ]
+    ):
         return "subscription"
 
     # 10 PROPERTY COMPARISON
-    elif any(x in query for x in [
-        "compare", "comparison", "better", "difference", "vs",
-        "which is better", "best option"
-    ]):
+    elif any(
+        x in query
+        for x in [
+            "compare",
+            "comparison",
+            "better",
+            "difference",
+            "vs",
+            "which is better",
+            "best option",
+        ]
+    ):
         return "compare"
 
     # DEFAULT → property search
@@ -173,13 +261,14 @@ def detect_assistant_type(msg):
 # BUILD CONTEXT PER ASSISTANT (shared helper)
 # =========================================
 
+
 def build_context(uid, msg, assistant_type):
     """
     Fetches the relevant database / Pinecone context for each assistant type.
     Returns a plain-text context string that is fed to the AI.
     """
     context = ""
-    query   = msg.lower()
+    query = msg.lower()
 
     # ------------------------------------------------------------------
     # 1  PROPERTY SEARCH
@@ -188,26 +277,39 @@ def build_context(uid, msg, assistant_type):
 
         smart_query = query
 
-        if "girls"  in smart_query: smart_query += " girls pg"
-        if "boys"   in smart_query: smart_query += " boys pg"
-        if "food"   in smart_query: smart_query += " food included"
-        if "2bhk"   in smart_query: smart_query += " 2bhk"
-        if "1bhk"   in smart_query: smart_query += " 1bhk"
-        if "chennai" in smart_query: smart_query += " chennai"
+        if "girls" in smart_query:
+            smart_query += " girls pg"
+        if "boys" in smart_query:
+            smart_query += " boys pg"
+        if "food" in smart_query:
+            smart_query += " food included"
+        if "2bhk" in smart_query:
+            smart_query += " 2bhk"
+        if "1bhk" in smart_query:
+            smart_query += " 1bhk"
+        if "chennai" in smart_query:
+            smart_query += " chennai"
 
         # user preference enrichment
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT city, locality, "preferredTenant", "foodIncluded", "rentMin", "rentMax"
             FROM "UserPreference"
             WHERE "userId"=%s
             ORDER BY id DESC LIMIT 1
-        """, (uid,))
+        """,
+            (uid,),
+        )
         pref = cursor.fetchone()
         if pref:
-            if pref[0]: smart_query += f" {pref[0]}"
-            if pref[1]: smart_query += f" {pref[1]}"
-            if pref[2]: smart_query += f" {pref[2]}"
-            if pref[3]: smart_query += " food included"
+            if pref[0]:
+                smart_query += f" {pref[0]}"
+            if pref[1]:
+                smart_query += f" {pref[1]}"
+            if pref[2]:
+                smart_query += f" {pref[2]}"
+            if pref[3]:
+                smart_query += " food included"
 
         results = call_mcp_tool("search-properties", {"query": smart_query})
 
@@ -228,7 +330,8 @@ Type     : {meta.get('propertyType')}
     elif assistant_type == "visit":
 
         if "cancel" in query:
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE "Visit"
                 SET status='cancelled'
                 WHERE id=(
@@ -236,18 +339,23 @@ Type     : {meta.get('propertyType')}
                     WHERE "userId"=%s AND status!='cancelled'
                     ORDER BY "visitDateTime" DESC LIMIT 1
                 )
-            """, (uid,))
+            """,
+                (uid,),
+            )
             context = "Your latest visit has been cancelled successfully."
 
         elif "confirmed" in query:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT p."propertyName", p.city, p.locality, p."propertyType",
                        v."visitDateTime", v.status
                 FROM "Visit" v
                 JOIN "Property" p ON p.id = v."propertyId"
                 WHERE v."userId"=%s AND v.status='confirmed'
                 ORDER BY v."visitDateTime" ASC
-            """, (uid,))
+            """,
+                (uid,),
+            )
             rows = cursor.fetchall()
             if rows:
                 for r in rows:
@@ -256,14 +364,17 @@ Type     : {meta.get('propertyType')}
                 context = "No confirmed visits found."
 
         elif "next" in query or "upcoming" in query:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT p."propertyName", p.city, p.locality, p."propertyType",
                        v."visitDateTime", v.status
                 FROM "Visit" v
                 JOIN "Property" p ON p.id = v."propertyId"
                 WHERE v."userId"=%s AND v."visitDateTime" >= NOW()
                 ORDER BY v."visitDateTime" ASC LIMIT 1
-            """, (uid,))
+            """,
+                (uid,),
+            )
             rows = cursor.fetchall()
             if rows:
                 for r in rows:
@@ -272,14 +383,17 @@ Type     : {meta.get('propertyType')}
                 context = "No upcoming visits found."
 
         elif "chennai" in query:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT p."propertyName", p.city, p.locality, p."propertyType",
                        v."visitDateTime", v.status
                 FROM "Visit" v
                 JOIN "Property" p ON p.id = v."propertyId"
                 WHERE v."userId"=%s AND LOWER(p.city)='chennai'
                 ORDER BY v."visitDateTime" DESC
-            """, (uid,))
+            """,
+                (uid,),
+            )
             rows = cursor.fetchall()
             if rows:
                 for r in rows:
@@ -288,14 +402,17 @@ Type     : {meta.get('propertyType')}
                 context = "No Chennai visits found."
 
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT p."propertyName", p.city, p.locality, p."propertyType",
                        v."visitDateTime", v.status
                 FROM "Visit" v
                 JOIN "Property" p ON p.id = v."propertyId"
                 WHERE v."userId"=%s
                 ORDER BY v."visitDateTime" DESC
-            """, (uid,))
+            """,
+                (uid,),
+            )
             rows = cursor.fetchall()
             if rows:
                 for r in rows:
@@ -308,13 +425,16 @@ Type     : {meta.get('propertyType')}
     # ------------------------------------------------------------------
     elif assistant_type == "liked":
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT p."propertyName", p.city, p.locality, p."propertyType", l."createdAt"
             FROM "Like" l
             JOIN "Property" p ON p.id = l."propertyId"
             WHERE l."userId"=%s
             ORDER BY l."createdAt" DESC
-        """, (uid,))
+        """,
+            (uid,),
+        )
         rows = cursor.fetchall()
         if rows:
             for r in rows:
@@ -327,7 +447,8 @@ Type     : {meta.get('propertyType')}
     # ------------------------------------------------------------------
     elif assistant_type == "message":
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT m.message, m."createdAt",
                    p."propertyName",
                    u.name AS receiver_name
@@ -337,11 +458,15 @@ Type     : {meta.get('propertyType')}
             WHERE m."senderId"=%s
             ORDER BY m."createdAt" DESC
             LIMIT 10
-        """, (uid,))
+        """,
+            (uid,),
+        )
         rows = cursor.fetchall()
         if rows:
             for r in rows:
-                context += f"\nMessage: {r[0]} | Property: {r[2]} | To: {r[3]} | At: {r[1]}"
+                context += (
+                    f"\nMessage: {r[0]} | Property: {r[2]} | To: {r[3]} | At: {r[1]}"
+                )
         else:
             context = "No messages sent by you found."
 
@@ -350,12 +475,15 @@ Type     : {meta.get('propertyType')}
     # ------------------------------------------------------------------
     elif assistant_type == "roommate":
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT "sharingTypes", "createdAt"
             FROM "UserPreference"
             WHERE "userId"=%s
             ORDER BY id DESC LIMIT 1
-        """, (uid,))
+        """,
+            (uid,),
+        )
         row = cursor.fetchone()
         if row:
             prefs = row[0]
@@ -363,19 +491,24 @@ Type     : {meta.get('propertyType')}
                 prefs = json.loads(prefs)
             context = f"Your roommate preferences:\n{json.dumps(prefs, indent=2)}"
         else:
-            context = "No roommate preferences saved. Please set your preferences first."
+            context = (
+                "No roommate preferences saved. Please set your preferences first."
+            )
 
     # ------------------------------------------------------------------
     # 6  MATCH / COMPATIBILITY ASSISTANT
     # ------------------------------------------------------------------
     elif assistant_type == "match":
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT "sharingTypes"
             FROM "UserPreference"
             WHERE "userId"=%s
             ORDER BY id DESC LIMIT 1
-        """, (uid,))
+        """,
+            (uid,),
+        )
         current = cursor.fetchone()
 
         if not current:
@@ -385,16 +518,26 @@ Type     : {meta.get('propertyType')}
             if isinstance(current_data, str):
                 current_data = json.loads(current_data)
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT u.id, u.name, u.mobile, p."sharingTypes"
                 FROM "UserPreference" p
                 JOIN "User" u ON u.id = p."userId"
                 WHERE u.id != %s
-            """, (uid,))
+            """,
+                (uid,),
+            )
             rows = cursor.fetchall()
 
-            fields = ["sleepTiming","foodHabit","smoking","drinking",
-                      "occupation","petFriendly","cleaningFrequency"]
+            fields = [
+                "sleepTiming",
+                "foodHabit",
+                "smoking",
+                "drinking",
+                "occupation",
+                "petFriendly",
+                "cleaningFrequency",
+            ]
             matches_found = []
 
             for row in rows:
@@ -403,13 +546,13 @@ Type     : {meta.get('propertyType')}
                     other_data = json.loads(other_data)
                 if not isinstance(other_data, dict):
                     continue
-                score = sum(2 for f in fields if current_data.get(f) == other_data.get(f))
+                score = sum(
+                    2 for f in fields if current_data.get(f) == other_data.get(f)
+                )
                 if score >= 5:
-                    matches_found.append({
-                        "name": row[1],
-                        "mobile": row[2],
-                        "score": score
-                    })
+                    matches_found.append(
+                        {"name": row[1], "mobile": row[2], "score": score}
+                    )
 
             matches_found.sort(key=lambda x: x["score"], reverse=True)
 
@@ -424,14 +567,17 @@ Type     : {meta.get('propertyType')}
     # ------------------------------------------------------------------
     elif assistant_type == "ad":
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT p."propertyName", p.city, p.locality, p."propertyType",
                    p.parking, u.name, u.mobile
             FROM "Property" p
             JOIN "User" u ON u.id = p."userId"
             WHERE p."userId"=%s
             ORDER BY p."createdAt" DESC LIMIT 1
-        """, (uid,))
+        """,
+            (uid,),
+        )
         row = cursor.fetchone()
         if row:
             context = (
@@ -447,13 +593,16 @@ Type     : {meta.get('propertyType')}
     # ------------------------------------------------------------------
     elif assistant_type == "movein":
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT p."propertyName", p.city, p.locality, p."propertyType"
             FROM "Property" p
             JOIN "Visit" v ON v."propertyId" = p.id
             WHERE v."userId"=%s AND v.status='confirmed'
             ORDER BY v."visitDateTime" DESC LIMIT 1
-        """, (uid,))
+        """,
+            (uid,),
+        )
         row = cursor.fetchone()
         if row:
             suggestions = [
@@ -462,10 +611,14 @@ Type     : {meta.get('propertyType')}
                 "Arrange electricity and water setup on day 1.",
             ]
             ptype = str(row[3]).lower()
-            if "pg"   in ptype: suggestions.append("Confirm WiFi, shared washroom, and meal timings.")
-            elif "1bhk" in ptype: suggestions.append("Use compact furniture to maximise space.")
-            elif "2bhk" in ptype: suggestions.append("Plan room-wise shifting for smoother move.")
-            elif "villa" in ptype: suggestions.append("Inspect parking, garden, and security gate.")
+            if "pg" in ptype:
+                suggestions.append("Confirm WiFi, shared washroom, and meal timings.")
+            elif "1bhk" in ptype:
+                suggestions.append("Use compact furniture to maximise space.")
+            elif "2bhk" in ptype:
+                suggestions.append("Plan room-wise shifting for smoother move.")
+            elif "villa" in ptype:
+                suggestions.append("Inspect parking, garden, and security gate.")
             context = "\n".join(suggestions)
         else:
             context = (
@@ -483,12 +636,15 @@ Type     : {meta.get('propertyType')}
     elif assistant_type == "subscription":
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT plan, status, "startDate", "endDate"
                 FROM "Subscription"
                 WHERE "userId"=%s
                 ORDER BY "startDate" DESC LIMIT 1
-            """, (uid,))
+            """,
+                (uid,),
+            )
             row = cursor.fetchone()
             if row:
                 context = (
@@ -505,14 +661,17 @@ Type     : {meta.get('propertyType')}
     # ------------------------------------------------------------------
     elif assistant_type == "compare":
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT p."propertyName", p.city, p.locality, p."propertyType",
                    p.parking, l."createdAt"
             FROM "Like" l
             JOIN "Property" p ON p.id = l."propertyId"
             WHERE l."userId"=%s
             ORDER BY l."createdAt" DESC LIMIT 2
-        """, (uid,))
+        """,
+            (uid,),
+        )
         rows = cursor.fetchall()
         if len(rows) >= 2:
             context = "Comparing your last 2 saved properties:\n"
@@ -554,8 +713,8 @@ def voice_reply():
 
     try:
         data = request.json
-        uid  = data["userId"]
-        msg  = data["message"]
+        uid = data["userId"]
+        msg = data["message"]
 
         print("USER:", uid)
         print("MESSAGE:", msg)
@@ -589,10 +748,8 @@ def voice_reply():
         # AI RESPONSE
         # =====================================
         res = client.chat.completions.create(
-
             model="llama-3.1-8b-instant",
             temperature=0.2,
-
             messages=[
                 {
                     "role": "system",
@@ -623,7 +780,7 @@ STRICT RULES:
 - Be conversational and helpful
 
 Detected language: {user_language}
-"""
+""",
                 },
                 {
                     "role": "user",
@@ -633,9 +790,9 @@ User Query:
 
 Database Data:
 {context}
-"""
-                }
-            ]
+""",
+                },
+            ],
         )
 
         reply = res.choices[0].message.content
@@ -650,12 +807,14 @@ Database Data:
         # =====================================
         # FINAL RESPONSE
         # =====================================
-        return jsonify({
-            "reply":     reply,
-            "audio":     audio_url,
-            "language":  user_language,
-            "assistant": assistant_type
-        })
+        return jsonify(
+            {
+                "reply": reply,
+                "audio": audio_url,
+                "language": user_language,
+                "assistant": assistant_type,
+            }
+        )
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -669,8 +828,8 @@ def chat():
 
     try:
         data = request.json
-        uid  = data["userId"]
-        msg  = data["message"]
+        uid = data["userId"]
+        msg = data["message"]
 
         user_language = detect_language(msg)
         save_chat(uid, "user", msg)
@@ -691,10 +850,8 @@ def chat():
         # AI RESPONSE
         # =====================================
         res = client.chat.completions.create(
-
             model="llama-3.1-8b-instant",
             temperature=0.2,
-
             messages=[
                 {
                     "role": "system",
@@ -722,7 +879,7 @@ IMPORTANT RULES:
 - Use ONLY given database data
 - Never hallucinate properties or information
 - Keep answers short and clear
-"""
+""",
                 },
                 {
                     "role": "user",
@@ -735,19 +892,17 @@ Language:
 
 Database Data:
 {context}
-"""
-                }
-            ]
+""",
+                },
+            ],
         )
 
         reply = res.choices[0].message.content
         save_chat(uid, "assistant", reply)
 
-        return jsonify({
-            "reply":     reply,
-            "context":   context,
-            "assistant": assistant_type
-        })
+        return jsonify(
+            {"reply": reply, "context": context, "assistant": assistant_type}
+        )
 
     except Exception as e:
         print("CHAT ERROR:", e)
@@ -776,11 +931,16 @@ def generate_voice(text, lang_code="en"):
 def detect_language(text):
     try:
         lang = detect(text)
-        if lang == "ta":  return "TAMIL"
-        elif lang == "hi": return "HINDI"
-        elif lang == "kn": return "KANNADA"
-        elif lang == "te": return "TELUGU"
-        else:              return "ENGLISH"
+        if lang == "ta":
+            return "TAMIL"
+        elif lang == "hi":
+            return "HINDI"
+        elif lang == "kn":
+            return "KANNADA"
+        elif lang == "te":
+            return "TELUGU"
+        else:
+            return "ENGLISH"
     except:
         return "ENGLISH"
 
@@ -790,10 +950,13 @@ def detect_language(text):
 # =========================================
 def save_chat(uid, role, content):
     try:
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO "ChatMessage" ("userId", role, content, "createdAt")
             VALUES (%s, %s, %s, NOW())
-        """, (uid, role, content))
+        """,
+            (uid, role, content),
+        )
     except Exception as e:
         print(e)
 
@@ -804,9 +967,7 @@ def save_chat(uid, role, content):
 def call_mcp_tool(tool, payload):
     try:
         response = requests.post(
-            f"http://localhost:5000/mcp/{tool}",
-            json=payload,
-            timeout=20
+            f"http://localhost:5000/mcp/{tool}", json=payload, timeout=20
         )
         return response.json()
     except Exception as e:
@@ -823,25 +984,24 @@ def mcp_search_properties():
     print("🔥 MCP SEARCH TOOL EXECUTED")
 
     try:
-        data  = request.json
+        data = request.json
         query = data.get("query", "")
 
         vector = create_embedding(query)
 
         results = index.query(
-            vector=vector,
-            top_k=5,
-            include_metadata=True,
-            filter={"type": "property"}
+            vector=vector, top_k=5, include_metadata=True, filter={"type": "property"}
         )
 
         matches = []
         for m in results.get("matches", []):
-            matches.append({
-                "id":       m.get("id"),
-                "score":    float(m.get("score", 0)),
-                "metadata": m.get("metadata", {})
-            })
+            matches.append(
+                {
+                    "id": m.get("id"),
+                    "score": float(m.get("score", 0)),
+                    "metadata": m.get("metadata", {}),
+                }
+            )
 
         return jsonify({"matches": matches})
 
@@ -862,21 +1022,24 @@ def mcp_get_properties_by_city():
         data = request.json
         city = data.get("city")
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT id, city, locality, "propertyName", "propertyType"
             FROM "Property"
             WHERE LOWER(city)=LOWER(%s)
-        """, (city,))
+        """,
+            (city,),
+        )
 
         rows = cursor.fetchall()
 
         properties = [
             {
-                "propertyId":   r[0],
-                "city":         r[1],
-                "locality":     r[2],
+                "propertyId": r[0],
+                "city": r[1],
+                "locality": r[2],
                 "propertyName": r[3],
-                "propertyType": r[4]
+                "propertyType": r[4],
             }
             for r in rows
         ]
@@ -902,11 +1065,14 @@ def register():
         if user:
             return jsonify({"message": "existing user", "userId": user[0]})
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO "User" (mobile, name, city, "createdAt")
             VALUES (%s, %s, %s, NOW())
             RETURNING id
-        """, (data["mobile"], data["name"], data["city"]))
+        """,
+            (data["mobile"], data["name"], data["city"]),
+        )
 
         uid = cursor.fetchone()[0]
         return jsonify({"message": "registered", "userId": uid})
@@ -924,18 +1090,27 @@ def add_property():
     try:
         data = request.json
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO "Property"
             ("userId", city, locality, street, landmark, latitude, longitude,
              "propertyName", "propertyType", parking, "createdAt", "updatedAt")
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW(),NOW())
             RETURNING id
-        """, (
-            data["userId"],   data["city"],       data["locality"],
-            data.get("street"), data.get("landmark"),
-            data.get("latitude"), data.get("longitude"),
-            data["propertyName"], data["propertyType"], data.get("parking")
-        ))
+        """,
+            (
+                data["userId"],
+                data["city"],
+                data["locality"],
+                data.get("street"),
+                data.get("landmark"),
+                data.get("latitude"),
+                data.get("longitude"),
+                data["propertyName"],
+                data["propertyType"],
+                data.get("parking"),
+            ),
+        )
 
         property_id = cursor.fetchone()[0]
 
@@ -948,18 +1123,22 @@ def add_property():
         )
         vector = create_embedding(vector_text)
 
-        index.upsert(vectors=[{
-            "id":     str(property_id),
-            "values": vector,
-            "metadata": {
-                "type":         "property",
-                "propertyId":   property_id,
-                "propertyName": data["propertyName"],
-                "city":         data["city"],
-                "locality":     data["locality"],
-                "propertyType": data["propertyType"]
-            }
-        }])
+        index.upsert(
+            vectors=[
+                {
+                    "id": str(property_id),
+                    "values": vector,
+                    "metadata": {
+                        "type": "property",
+                        "propertyId": property_id,
+                        "propertyName": data["propertyName"],
+                        "city": data["city"],
+                        "locality": data["locality"],
+                        "propertyType": data["propertyType"],
+                    },
+                }
+            ]
+        )
 
         return jsonify({"message": "property added", "propertyId": property_id})
 
@@ -976,26 +1155,85 @@ def properties():
     try:
         city = request.args.get("city")
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT id, city, locality, "propertyName", "propertyType"
             FROM "Property"
             WHERE LOWER(city)=LOWER(%s)
-        """, (city,))
+        """,
+            (city,),
+        )
 
         rows = cursor.fetchall()
 
-        return jsonify([
-            {
-                "propertyId":   r[0],
-                "city":         r[1],
-                "locality":     r[2],
-                "propertyName": r[3],
-                "propertyType": r[4]
-            }
-            for r in rows
-        ])
+        return jsonify(
+            [
+                {
+                    "propertyId": r[0],
+                    "title": r[3],
+                    "subtitle": f"{r[2]}, {r[1]}",
+                    "city": r[1],
+                    "locality": r[2],
+                    "propertyType": r[4],
+                    "parking": "Available",
+                    "gallery": [
+                        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85"
+                    ],
+                }
+                for r in rows
+            ]
+        )
 
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# =========================================
+# SEMANTIC PROPERTY SEARCH
+# =========================================
+@app.route("/properties/semantic", methods=["GET"])
+def semantic_properties():
+
+    try:
+        query = request.args.get("query", "")
+        city = request.args.get("city", "")
+        top_k = int(request.args.get("topK", 5))
+
+        # create embedding
+        vector = create_embedding(query)
+
+        # pinecone search
+        results = index.query(vector=vector, top_k=top_k, include_metadata=True)
+
+        matches = []
+
+        for m in results.get("matches", []):
+
+            meta = m.get("metadata", {})
+
+            # optional city filter
+            if city and meta.get("city", "").lower() != city.lower():
+                continue
+
+            matches.append(
+                {
+                    "propertyId": meta.get("propertyId"),
+                    "title": meta.get("propertyName"),
+                    "subtitle": f"{meta.get('locality')}, {meta.get('city')}",
+                    "city": meta.get("city"),
+                    "locality": meta.get("locality"),
+                    "propertyType": meta.get("propertyType"),
+                    "parking": "Available",
+                    "gallery": [
+                        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85"
+                    ],
+                }
+            )
+
+        return jsonify(matches)
+
+    except Exception as e:
+        print("SEMANTIC SEARCH ERROR:", e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -1008,11 +1246,14 @@ def like():
     try:
         data = request.json
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO "Like" ("userId", "propertyId", "createdAt")
             VALUES (%s, %s, NOW())
             ON CONFLICT DO NOTHING
-        """, (data["userId"], data["propertyId"]))
+        """,
+            (data["userId"], data["propertyId"]),
+        )
 
         return jsonify({"message": "property liked"})
 
@@ -1029,10 +1270,13 @@ def visit():
     try:
         data = request.json
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO "Visit" ("userId", "propertyId", "visitDateTime", status, "createdAt")
             VALUES (%s, %s, %s, 'pending', NOW())
-        """, (data["userId"], data["propertyId"], data["visitDateTime"]))
+        """,
+            (data["userId"], data["propertyId"], data["visitDateTime"]),
+        )
 
         return jsonify({"message": "visit booked"})
 
@@ -1049,7 +1293,9 @@ def message_owner():
     try:
         data = request.json
 
-        cursor.execute('SELECT "userId" FROM "Property" WHERE id=%s', (data["propertyId"],))
+        cursor.execute(
+            'SELECT "userId" FROM "Property" WHERE id=%s', (data["propertyId"],)
+        )
         owner = cursor.fetchone()
 
         if not owner:
@@ -1057,10 +1303,13 @@ def message_owner():
 
         receiver_id = owner[0]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO "Message" ("senderId", "receiverId", "propertyId", "message", "createdAt")
             VALUES (%s, %s, %s, %s, NOW())
-        """, (data["senderId"], receiver_id, data["propertyId"], data["message"]))
+        """,
+            (data["senderId"], receiver_id, data["propertyId"], data["message"]),
+        )
 
         return jsonify({"message": "message sent"})
 
@@ -1077,10 +1326,13 @@ def roommate():
     try:
         data = request.json
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO "UserPreference" ("userId", "sharingTypes", "createdAt", "updatedAt")
             VALUES (%s, %s, NOW(), NOW())
-        """, (data["userId"], json.dumps(data["preferences"])))
+        """,
+            (data["userId"], json.dumps(data["preferences"])),
+        )
 
         return jsonify({"message": "preferences saved"})
 
@@ -1095,12 +1347,15 @@ def roommate():
 def matches(uid):
 
     try:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT "sharingTypes"
             FROM "UserPreference"
             WHERE "userId"=%s
             ORDER BY id DESC LIMIT 1
-        """, (uid,))
+        """,
+            (uid,),
+        )
 
         current = cursor.fetchone()
         if not current:
@@ -1112,17 +1367,27 @@ def matches(uid):
         if not isinstance(current_data, dict):
             return jsonify({"error": "invalid current user preferences format"}), 400
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT u.id, u.name, u.mobile, p."sharingTypes"
             FROM "UserPreference" p
             JOIN "User" u ON u.id = p."userId"
             WHERE u.id != %s
-        """, (uid,))
+        """,
+            (uid,),
+        )
 
         rows = cursor.fetchall()
 
-        fields = ["sleepTiming","foodHabit","smoking","drinking",
-                  "occupation","petFriendly","cleaningFrequency"]
+        fields = [
+            "sleepTiming",
+            "foodHabit",
+            "smoking",
+            "drinking",
+            "occupation",
+            "petFriendly",
+            "cleaningFrequency",
+        ]
 
         results = []
         for row in rows:
@@ -1133,7 +1398,9 @@ def matches(uid):
                 continue
             score = sum(2 for f in fields if current_data.get(f) == other_data.get(f))
             if score >= 5:
-                results.append({"userId": row[0], "name": row[1], "mobile": row[2], "score": score})
+                results.append(
+                    {"userId": row[0], "name": row[1], "mobile": row[2], "score": score}
+                )
 
         results.sort(key=lambda x: x["score"], reverse=True)
         return jsonify(results)
@@ -1151,19 +1418,22 @@ def generate_ad():
     try:
         data = request.json
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT p.city, p.locality, p."propertyName", p."propertyType",
                    p.parking, u.name, u.mobile
             FROM "Property" p
             JOIN "User" u ON p."userId" = u.id
             WHERE p.id=%s
-        """, (data["propertyId"],))
+        """,
+            (data["propertyId"],),
+        )
 
         prop = cursor.fetchone()
         if not prop:
             return jsonify({"error": "No property found"}), 404
 
-        upload    = cloudinary.uploader.upload(data["imagePath"])
+        upload = cloudinary.uploader.upload(data["imagePath"])
         image_url = upload["secure_url"]
 
         prompt = f"""
@@ -1189,17 +1459,19 @@ Rules:
         res = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             temperature=0.5,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
         )
 
         ad = res.choices[0].message.content
 
-        return jsonify({
-            "advertisement": ad,
-            "imageUrl":      image_url,
-            "ownerName":     prop[5],
-            "mobile":        prop[6]
-        })
+        return jsonify(
+            {
+                "advertisement": ad,
+                "imageUrl": image_url,
+                "ownerName": prop[5],
+                "mobile": prop[6],
+            }
+        )
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -1212,11 +1484,14 @@ Rules:
 def move_in(pid):
 
     try:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT city, locality, "propertyName", "propertyType"
             FROM "Property"
             WHERE id=%s
-        """, (pid,))
+        """,
+            (pid,),
+        )
 
         p = cursor.fetchone()
         if not p:
@@ -1227,13 +1502,17 @@ def move_in(pid):
         suggestions = [
             "Deep clean before moving",
             f"Check locality {p[1]}, {p[0]}",
-            "Arrange electricity & water setup"
+            "Arrange electricity & water setup",
         ]
 
-        if   "pg"   in property_type: suggestions.append("Check WiFi and shared washroom")
-        elif "1bhk" in property_type: suggestions.append("Use compact furniture")
-        elif "2bhk" in property_type: suggestions.append("Plan room-wise shifting")
-        elif "villa" in property_type: suggestions.append("Inspect parking and garden")
+        if "pg" in property_type:
+            suggestions.append("Check WiFi and shared washroom")
+        elif "1bhk" in property_type:
+            suggestions.append("Use compact furniture")
+        elif "2bhk" in property_type:
+            suggestions.append("Plan room-wise shifting")
+        elif "villa" in property_type:
+            suggestions.append("Inspect parking and garden")
 
         return jsonify({"moveInSuggestions": suggestions})
 
