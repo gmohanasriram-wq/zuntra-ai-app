@@ -289,6 +289,6 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 **Mohana Sriram G**  
 Software Engineer | Full‑Stack Developer | AI Enthusiast  
 
-GitHub: [https://github.com/gmohanasriram](https://github.com/gmohanasriram)  
-LinkedIn: [https://linkedin.com/in/gmohanasriram](https://linkedin.com/in/gmohanasriram)  
-Email: your.email@example.com
+GitHub: [https://github.com/gmohanasriram](https://github.com/gmohanasriram-wq)  
+LinkedIn: [https://linkedin.com/in/gmohanasriram](http://linkedin.com/in/mohana-sriram-g-072062340)  
+Email: gmohanasriram@gmail.com
