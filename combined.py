@@ -21,7 +21,7 @@ app = Flask(__name__)
 mcp = FastMCP(
     "ZuntraAI",
     mask_error_details=True,
-    on_duplicate_tools="error",
+    on_duplicate="error",
 )
 
 # =========================================================
